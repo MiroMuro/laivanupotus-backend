@@ -31,10 +31,7 @@ public class GameController {
 	private final GameService gameService;
 	private final UserService userService;
 
-	public GameController(GameService gameService, UserService userService) {
-		this.gameService = gameService;
-		this.userService = userService;
-	};
+
 
 	//New game creation
 	@PostMapping("/create")

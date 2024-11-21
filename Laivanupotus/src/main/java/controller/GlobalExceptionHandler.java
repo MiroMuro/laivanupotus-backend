@@ -21,10 +21,7 @@ public class GlobalExceptionHandler {
 	@Data
 	@AllArgsConstructor
 	public static class ErrorResponse {
-		public ErrorResponse(int status, String message) {
-			this.status = status;
-			this.message = message;
-		}
+
 
 		private int status;
 		private String message;

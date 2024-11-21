@@ -3,11 +3,14 @@ package service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
 import model.Match;
 import model.Move;
 import model.Ship;
 import model.User;
 
+@Service
 public interface GameService {
 	List<Match> findAvailableMatches();
 
