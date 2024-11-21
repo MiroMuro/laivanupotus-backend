@@ -9,11 +9,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import model.User;
+import service.UserService;
 
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
+
+	private final UserService userService;
+
+	public UserController(UserService userService) {
+		this.userService = userService;
+	}
 
 	@PostMapping("/register")
 	public ResponseEntity<User> registerNewUser(@RequestBody User user) {
@@ -28,14 +36,14 @@ public class UserController {
 	};
 
 	@PostMapping("/logout")
-	public ResponseEntity logOutUser(@RequestBody User user) {
+	public ResponseEntity<Object> logOutUser(@RequestBody User user) {
 		userService.logoutUser(user);
 		return ResponseEntity.ok().build();
 	};
 
 	@PostMapping("/{userId")
 	public ResponseEntity<User> getUserProfile(@PathVariable Long userId) {
-		User user = userService.findById(userId).orElseThrow(() -> new RunTimeException("User not found!"));
+		User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
 		return ResponseEntity.ok(user);
 	};
 }
