@@ -1,0 +1,9 @@
+salis: verticosslock98!
+
+docker run --name battleships-postgres \
+  -e POSTGRES_PASSWORD=verticosslock98! \
+  -e POSTGRES_USER=miromuro \
+  -e POSTGRES_DB=battleships \
+  -p 5433:5432 \
+  -d postgres
+  
