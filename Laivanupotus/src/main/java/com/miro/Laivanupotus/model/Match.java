@@ -1,4 +1,4 @@
-package model;
+package com.miro.Laivanupotus.model;
 
 import java.time.LocalDateTime;
 

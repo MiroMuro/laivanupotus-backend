@@ -1,14 +1,14 @@
-package service;
+package com.miro.Laivanupotus.service;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import model.Match;
-import model.Move;
-import model.Ship;
-import model.User;
+import com.miro.Laivanupotus.model.Match;
+import com.miro.Laivanupotus.model.Move;
+import com.miro.Laivanupotus.model.Ship;
+import com.miro.Laivanupotus.model.User;
 
 @Service
 public interface GameService {

@@ -1,4 +1,4 @@
-package controller;
+package com.miro.Laivanupotus.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

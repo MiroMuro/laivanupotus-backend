@@ -1,4 +1,4 @@
-package controller;
+package com.miro.Laivanupotus.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.miro.Laivanupotus.model.User;
+import com.miro.Laivanupotus.service.UserService;
+
 import lombok.RequiredArgsConstructor;
-import model.User;
-import service.UserService;
 
 @RestController
 @RequestMapping("/api/user")
@@ -28,8 +29,8 @@ public class UserController {
 	};
 
 	@PostMapping("/login")
-	public ResponseEntity<User> loginUser(@RequestBody User user) {
-		User loggedInUser = userService.loginUser(user);
+	public ResponseEntity<User> loginUser(@RequestBody String userName, String passWord) {
+		User loggedInUser = userService.loginUser(userName, passWord);
 		return ResponseEntity.ok(loggedInUser);
 	};
 
@@ -39,7 +40,7 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	};
 
-	@PostMapping("/{userId")
+	@PostMapping("/{userId}/profile")
 	public ResponseEntity<User> getUserProfile(@PathVariable Long userId) {
 		User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
 		return ResponseEntity.ok(user);

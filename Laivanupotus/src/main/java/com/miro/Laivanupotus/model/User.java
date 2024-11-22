@@ -1,4 +1,4 @@
-package model;
+package com.miro.Laivanupotus.model;
 
 import java.time.LocalDateTime;
 
@@ -10,10 +10,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "players")
 @Data
+@Getter
+@Setter
 public class User {
 
 	@Id
@@ -33,6 +37,7 @@ public class User {
 
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	private LocalDateTime lastLogin;
 
 	@PrePersist
 	protected void onCreate() {

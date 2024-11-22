@@ -1,4 +1,4 @@
-package model;
+package com.miro.Laivanupotus.model;
 
 import java.util.List;
 
@@ -43,5 +43,25 @@ public class Board {
 	public boolean makeAMove(Move move) {
 		// Implementation for making a move
 		return false;
+	}
+
+	public boolean isShipSunk(Ship ship) {
+		int hits = 0;
+		int length = ship.getType().getLength();
+		boolean isVertical = ship.isVertical();
+		for (int i = 0; i < length; i++) {
+			int x = ship.getX() + (isVertical ? 0 : i);
+			int y = ship.getY() + (isVertical ? i : 0);
+
+			for (Move move : this.moves) {
+				if (move.getX() == x && move.getY() == y) {
+					hits++;
+					break;
+				}
+				;
+			}
+		}
+		;
+		return hits == length;
 	}
 }

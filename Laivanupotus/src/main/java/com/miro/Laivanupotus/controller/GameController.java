@@ -1,4 +1,4 @@
-package controller;
+package com.miro.Laivanupotus.controller;
 
 import java.util.List;
 
@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.miro.Laivanupotus.model.Match;
+import com.miro.Laivanupotus.model.Move;
+import com.miro.Laivanupotus.model.Ship;
+import com.miro.Laivanupotus.model.User;
+import com.miro.Laivanupotus.service.GameService;
+import com.miro.Laivanupotus.service.UserService;
+
 import lombok.RequiredArgsConstructor;
-import model.Match;
-import model.Move;
-import model.Ship;
-import model.User;
-import service.GameService;
-import service.UserService;
 
 
 @RestController

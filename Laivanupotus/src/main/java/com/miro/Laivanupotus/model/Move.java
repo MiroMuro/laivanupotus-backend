@@ -1,4 +1,4 @@
-package model;
+package com.miro.Laivanupotus.model;
 
 import jakarta.persistence.Embeddable;
 import lombok.Data;

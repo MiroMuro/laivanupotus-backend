@@ -1,4 +1,4 @@
-package serviceImp;
+package com.miro.Laivanupotus.serviceImp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -6,14 +6,14 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import model.Board;
-import model.Match;
-import model.Match.GameStatus;
-import model.Move;
-import model.Ship;
-import model.User;
-import repository.MatchRepository;
-import service.GameService;
+import com.miro.Laivanupotus.model.Board;
+import com.miro.Laivanupotus.model.Match;
+import com.miro.Laivanupotus.model.Move;
+import com.miro.Laivanupotus.model.Ship;
+import com.miro.Laivanupotus.model.User;
+import com.miro.Laivanupotus.model.Match.GameStatus;
+import com.miro.Laivanupotus.repository.MatchRepository;
+import com.miro.Laivanupotus.service.GameService;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -104,11 +104,10 @@ public class GameServiceImpl implements GameService {
 		Board boardToTarget = playerId.equals(match.getPlayer1().getId()) ? match.getPlayer2Board()
 				: match.getPlayer1Board();
 
+		boardToTarget.getMoves().add(move);
 		Boolean isHit = isHit(boardToTarget, move);
 		move.setHit(isHit);
 		move.setPlayerBehindTheMoveId(playerId);
-
-		boardToTarget.getMoves().add(move);
 
 		updateMatchState(match, boardToTarget, playerId);
 
@@ -149,9 +148,28 @@ public class GameServiceImpl implements GameService {
 	};
 
 	private boolean isHit(Board targetBoard, Move move) {
+
+		// S = ship, H = hit, M = miss, . = empty
 		char[][] board = convertStringToBoard(targetBoard.getBoardState());
 
-		return board[move.getX()][move.getY()] == 'S';
+		if (board[move.getX()][move.getY()] == 'H') {
+			return false;
+		}
+		;
+
+		// Check if the shot that hit sunk any ships.
+		if (board[move.getX()][move.getY()] == 'S') {
+			board[move.getX()][move.getY()] = 'H';
+			for(Ship ship : targetBoard.getShips()) {
+				ship.setSunk(targetBoard.isShipSunk(ship));
+				return true;
+			}
+		}
+		;
+
+		board[move.getX()][move.getY()] = 'M';
+		System.out.println("board after move: " + board);
+		return false;
 	};
 
 	// The userId here is the player who made the last move.
@@ -199,7 +217,7 @@ public class GameServiceImpl implements GameService {
 
 	private boolean isGameOver(Board board) {
 		// Check if all ships are sunk
-		return board.getShips().stream().allMatch(Ship::isSunk);
+		return board.getShips().stream().allMatch(ship -> board.isShipSunk(ship));
 	};
 
 
