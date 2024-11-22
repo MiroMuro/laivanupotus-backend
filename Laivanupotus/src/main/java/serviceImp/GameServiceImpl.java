@@ -66,18 +66,56 @@ public class GameServiceImpl implements GameService {
 			throw new RuntimeException("Match is not in the placing ships phase!");
 		}
 
-		if (playerId == match.getPlayer1().getId()) {
-			Board player1Board = match.getPlayer1Board();
-		} else {
-			Board player2Board = match.getPlayer2Board();
+		Board board = playerId.equals(match.getPlayer1().getId()) ? match.getPlayer1Board() : match.getPlayer2Board();
+
+		for (Ship ship : ships) {
+			if (!board.isValidPlacement(ship)) {
+				throw new RuntimeException("Invalid ship placement");
+			}
+			;
+			board.getShips().add(ship);
+			updateBoardState(board, ship);
 		}
 
-		return null;
+		// Check if both players have placed their ships
+		if (!match.getPlayer1Board().getShips().isEmpty() && !match.getPlayer2Board().getShips().isEmpty()) {
+			match.getStatus();
+			match.setStatus(GameStatus.IN_PROGRESS);
+			match.setCurrentTurnPlayerId(match.getPlayer1().getId());
+		}
+		return matchRepository.save(match);
 	}
 
+	// playerId is the player who made the move.
 	@Override
 	public Move makeMove(Long matchId, Long playerId, Move move) {
-		return null;
+		Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found!"));
+
+		if (match.getStatus() != GameStatus.IN_PROGRESS) {
+			throw new RuntimeException("Match is not in progress!");
+		}
+
+		if (!playerId.equals(match.getCurrentTurnPlayerId())) {
+			throw new RuntimeException("It's not your turn!");
+
+		}
+
+		// Determine which board to target
+		Board boardToTarget = playerId.equals(match.getPlayer1().getId()) ? match.getPlayer2Board()
+				: match.getPlayer1Board();
+
+		Boolean isHit = isHit(boardToTarget, move);
+		move.setHit(isHit);
+		move.setPlayerBehindTheMoveId(playerId);
+
+		boardToTarget.getMoves().add(move);
+
+		updateMatchState(match, boardToTarget, playerId);
+
+		matchRepository.save(match);
+
+		return move;
+
 	}
 
 	@Override
@@ -95,16 +133,75 @@ public class GameServiceImpl implements GameService {
 		return matchRepository.save(newMatch);
 	}
 
-	public void placeShip(Board board, Ship ship) {
-		int shipIndex = ship.getX();
-		int shipLength = ship.getType().getLength();
-		String originalBoardState = board.getBoardState();
+	private void updateBoardState(Board targetBoard, Ship ship) {
+		char[][] board = convertStringToBoard(targetBoard.getBoardState());
+		int length = ship.getType().getLength();
 
-		char shipChar = 'X';
+		for (int i = 0; i < length; i++) {
+			int x = ship.getX() + (ship.isVertical() ? 0 : i);
+			int y = ship.getY() + (ship.isVertical() ? i : 0);
+			board[x][y] = 'S';
+		}
+
+		System.out.println("board: " + board);
+
+		targetBoard.setBoardState(convertBoardToString(board));
+	};
+
+	private boolean isHit(Board targetBoard, Move move) {
+		char[][] board = convertStringToBoard(targetBoard.getBoardState());
+
+		return board[move.getX()][move.getY()] == 'S';
+	};
+
+	// The userId here is the player who made the last move.
+	private void updateMatchState(Match match, Board targetBoard, Long userId) {
+		// Check if game is over
+		if (isGameOver(targetBoard)) {
+			match.setEndedAt(LocalDateTime.now());
+			match.setUpdatedAt(LocalDateTime.now());
+			match.setStatus(GameStatus.FINISHED);
+			return;
+		}
+		;
+
+		match.setCurrentTurnPlayerId(
+				userId.equals(match.getPlayer1().getId()) ? match.getPlayer2().getId() : match.getPlayer1().getId());
+
+		match.setUpdatedAt(LocalDateTime.now());
 
 	};
 
-	public void placeVerticalShip(Board board, Ship ship) {
+	private char[][] convertStringToBoard(String boardState) {
+		char[][] board = new char[10][10];
+
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				board[i][j] = boardState.charAt(i * 10 + j);
+			}
+		}
+
+		return board;
 	};
+
+	private String convertBoardToString(char[][] board) {
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				sb.append(board[i][j]);
+			}
+		}
+
+		return sb.toString();
+
+	};
+
+	private boolean isGameOver(Board board) {
+		// Check if all ships are sunk
+		return board.getShips().stream().allMatch(Ship::isSunk);
+	};
+
+
 
 }
