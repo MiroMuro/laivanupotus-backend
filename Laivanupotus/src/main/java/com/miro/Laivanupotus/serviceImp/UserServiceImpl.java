@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.repository.UserRepository;
 import com.miro.Laivanupotus.service.UserService;
@@ -39,7 +40,6 @@ public class UserServiceImpl implements UserService {
 		user.setLastLogin(LocalDateTime.now());
 
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		// TODO Auto-generated method stub
 		return userRepository.save(user);
 	}
 
@@ -80,5 +80,11 @@ public class UserServiceImpl implements UserService {
 	public Optional<User> findByUsername(String username) {
 		// TODO Auto-generated method stub
 		return userRepository.findByUsername(username);
+	}
+
+	@Override
+	public UserDto userToDto(User user) {
+		UserDto userDto = new UserDto(user.getUsername(), user.getEmail());
+		return userDto;
 	}
 };

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.model.User;
 
 @Service
@@ -15,6 +16,8 @@ public interface UserService {
 	User registerUser(User user);
 
 	User loginUser(String username, String password);
+
+	UserDto userToDto(User user);
 
 	void logoutUser(User user);
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.service.UserService;
 
@@ -20,12 +21,11 @@ public class UserController {
 
 	private final UserService userService;
 
-
-
 	@PostMapping("/register")
-	public ResponseEntity<User> registerNewUser(@RequestBody User user) {
+	public ResponseEntity<UserDto> registerNewUser(@RequestBody User user) {
 		User newRegisteredUser = userService.registerUser(user);
-		return ResponseEntity.status(HttpStatus.CREATED).body(newRegisteredUser);
+		UserDto newRegisteredUserDto = userService.userToDto(newRegisteredUser);
+		return ResponseEntity.status(HttpStatus.CREATED).body(newRegisteredUserDto);
 	};
 
 	@PostMapping("/login")
