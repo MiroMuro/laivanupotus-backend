@@ -29,10 +29,11 @@ public class UserController {
 	};
 
 	@PostMapping("/login")
-	public ResponseEntity<User> loginUser(@RequestBody String userName, String passWord) {
-		User loggedInUser = userService.loginUser(userName, passWord);
+	public ResponseEntity<String> loginUser(@RequestBody String userName, String passWord) {
+		// Returns auth token as headers, if login successful.
+		ResponseEntity<String> loginResponse = userService.loginUser(userName, passWord);
 
-		return ResponseEntity.ok(loggedInUser);
+		return loginResponse;
 	};
 
 	@PostMapping("/logout")

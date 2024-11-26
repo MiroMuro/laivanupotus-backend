@@ -2,6 +2,7 @@ package com.miro.Laivanupotus.service;
 
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.miro.Laivanupotus.dto.UserDto;
@@ -15,7 +16,7 @@ public interface UserService {
 
 	User registerUser(User user);
 
-	User loginUser(String username, String password);
+	ResponseEntity<String> loginUser(String username, String password);
 
 	UserDto userToDto(User user);
 

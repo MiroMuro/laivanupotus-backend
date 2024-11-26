@@ -25,7 +25,7 @@ public class User {
 	private Long id;
 
 	@Column(unique = true, nullable = false)
-	private String username;
+	private String userName;
 	@Column(nullable = false)
 	private String email;
 	@Column(unique = true, nullable = false)
@@ -38,6 +38,7 @@ public class User {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private LocalDateTime lastLogin;
+	private String roles;
 
 	@PrePersist
 	protected void onCreate() {

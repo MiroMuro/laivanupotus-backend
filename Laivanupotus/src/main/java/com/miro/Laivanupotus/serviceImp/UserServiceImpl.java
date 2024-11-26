@@ -3,13 +3,21 @@ package com.miro.Laivanupotus.serviceImp;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.miro.Laivanupotus.dto.LoginRequestDto;
 import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.repository.UserRepository;
+import com.miro.Laivanupotus.service.TokenService;
 import com.miro.Laivanupotus.service.UserService;
+import com.miro.Laivanupotus.utils.UserAuthenticator;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +27,10 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
-
+	private final TokenService tokenService;
+	private final UserAuthenticator userAuthenticator;
 	private final BCryptPasswordEncoder passwordEncoder;
+
 
 	@Override
 	public Optional<User> findById(Long userId) {
@@ -30,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User registerUser(User user) {
-		if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+		if (userRepository.findByUserName(user.getUserName()).isPresent()) {
 			throw new RuntimeException("Username already exists");
 		}
 		user.setTotalGames(0);
@@ -44,9 +54,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User loginUser(String userName, String password) {
-
-		User userToLogin = userRepository.findByUsername(userName)
+	public ResponseEntity<String> loginUser(String userName, String password) {
+		System.out.println("THE UUSERNAME IN QUESTION: " + userName);
+		User userToLogin = userRepository.findByUserName(userName)
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
 		if (!passwordEncoder.matches(password, userToLogin.getPassword())) {
@@ -54,9 +64,34 @@ public class UserServiceImpl implements UserService {
 		}
 		;
 
+		LoginRequestDto loginReqDto = new LoginRequestDto(userName, password);
+		ResponseEntity<String> loginResponse = getLoginAuthResponse(loginReqDto);
+
 		userToLogin.setLastLogin(LocalDateTime.now());
-		// TODO Auto-generated method stub
-		return userRepository.save(userToLogin);
+		userRepository.save(userToLogin);
+
+		return loginResponse;
+	}
+
+	public ResponseEntity<String> getLoginAuthResponse(LoginRequestDto loginReqDto) {
+		try {
+			Authentication auth = userAuthenticator.attemptAuthentication(loginReqDto);
+			String loginAuthToken = tokenService.generateToken(auth);
+
+			HttpHeaders authHeader = createAuthHeadersWithToken(loginAuthToken);
+
+			return ResponseEntity.ok().headers(authHeader).body("Login succesful!");
+
+		} catch (AuthenticationException e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+		}
+
+	};
+
+	public HttpHeaders createAuthHeadersWithToken(String token) {
+		HttpHeaders authHeader = new HttpHeaders();
+		authHeader.add("Authorization", "Bearer " + token);
+		return authHeader;
 	}
 
 	@Override
@@ -79,12 +114,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Optional<User> findByUsername(String username) {
 		// TODO Auto-generated method stub
-		return userRepository.findByUsername(username);
+		return userRepository.findByUserName(username);
 	}
 
 	@Override
 	public UserDto userToDto(User user) {
-		UserDto userDto = new UserDto(user.getUsername(), user.getEmail());
+		UserDto userDto = new UserDto(user.getUserName(), user.getEmail());
 		return userDto;
 	}
+
+
 };
