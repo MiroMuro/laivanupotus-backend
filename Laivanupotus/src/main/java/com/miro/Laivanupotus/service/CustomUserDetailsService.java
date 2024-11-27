@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.repository.UserRepository;
 
 @Service
@@ -16,12 +15,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-		// My user impl.
-		User user = userRepo.findByUserName(userName)
-				.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + userName));
-		// Convert to Spring user impl.
-		return org.springframework.security.core.userdetails.User.withUsername(user.getUserName())
-				.password(user.getPassword()).roles("USER").build();
+		// Fetch implementation of my User and create an Spring User object out
+		// of it.
+
+		return userRepo.findByUserName(userName)
+				.map(user -> org.springframework.security.core.userdetails.User
+						.withUsername(user.getUserName())
+						.password(user.getPassword())
+						.authorities("ROLE_USER")
+						.build())
+				.orElseThrow(
+						() -> new UsernameNotFoundException("User not found!"));
 
 
 	};
