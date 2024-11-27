@@ -54,8 +54,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseEntity<String> loginUser(String userName, String password) {
+	public ResponseEntity<String> loginUser(LoginRequestDto loginDto) {
+
+		String userName = loginDto.getUserName();
+		String password = loginDto.getPassword();
+
 		System.out.println("THE UUSERNAME IN QUESTION: " + userName);
+
 		User userToLogin = userRepository.findByUserName(userName)
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -64,8 +69,7 @@ public class UserServiceImpl implements UserService {
 		}
 		;
 
-		LoginRequestDto loginReqDto = new LoginRequestDto(userName, password);
-		ResponseEntity<String> loginResponse = getLoginAuthResponse(loginReqDto);
+		ResponseEntity<String> loginResponse = getLoginAuthResponse(userName, password);
 
 		userToLogin.setLastLogin(LocalDateTime.now());
 		userRepository.save(userToLogin);
@@ -73,9 +77,9 @@ public class UserServiceImpl implements UserService {
 		return loginResponse;
 	}
 
-	public ResponseEntity<String> getLoginAuthResponse(LoginRequestDto loginReqDto) {
+	public ResponseEntity<String> getLoginAuthResponse(String userName, String password) {
 		try {
-			Authentication auth = userAuthenticator.attemptAuthentication(loginReqDto);
+			Authentication auth = userAuthenticator.attemptAuthentication(userName, password);
 			String loginAuthToken = tokenService.generateToken(auth);
 
 			HttpHeaders authHeader = createAuthHeadersWithToken(loginAuthToken);
@@ -122,6 +126,7 @@ public class UserServiceImpl implements UserService {
 		UserDto userDto = new UserDto(user.getUserName(), user.getEmail());
 		return userDto;
 	}
+
 
 
 };

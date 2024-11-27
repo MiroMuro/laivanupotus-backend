@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.miro.Laivanupotus.dto.LoginRequestDto;
 import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.service.UserService;
@@ -29,9 +30,9 @@ public class UserController {
 	};
 
 	@PostMapping("/login")
-	public ResponseEntity<String> loginUser(@RequestBody String userName, String passWord) {
+	public ResponseEntity<String> loginUser(@RequestBody LoginRequestDto loginDto) {
 		// Returns auth token as headers, if login successful.
-		ResponseEntity<String> loginResponse = userService.loginUser(userName, passWord);
+		ResponseEntity<String> loginResponse = userService.loginUser(loginDto);
 
 		return loginResponse;
 	};

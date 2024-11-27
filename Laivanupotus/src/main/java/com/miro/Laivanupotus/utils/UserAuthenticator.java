@@ -6,19 +6,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
-import com.miro.Laivanupotus.dto.LoginRequestDto;
-
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 public class UserAuthenticator {
 	private final AuthenticationManager authManager;
-	public Authentication attemptAuthentication(LoginRequestDto loginReqDto) throws AuthenticationException {
-		String username = loginReqDto.getUserName();
-		String password = loginReqDto.getPassword();
 
-		Authentication auth = new UsernamePasswordAuthenticationToken(username, password);
+	public Authentication attemptAuthentication(String userName, String password) throws AuthenticationException {
+		// String username = loginReqDto.getUserName();
+		// String password = loginReqDto.getPassword();
+
+		Authentication auth = new UsernamePasswordAuthenticationToken(userName, password);
 		return authManager.authenticate(auth);
 	}
 }
