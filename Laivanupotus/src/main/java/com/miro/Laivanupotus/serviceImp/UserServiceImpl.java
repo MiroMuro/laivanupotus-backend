@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.miro.Laivanupotus.dto.LoginRequestDto;
 import com.miro.Laivanupotus.dto.UserDto;
+import com.miro.Laivanupotus.interfaces.UserProfileDto;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.repository.UserRepository;
 import com.miro.Laivanupotus.service.TokenService;
 import com.miro.Laivanupotus.service.UserService;
 import com.miro.Laivanupotus.utils.UserAuthenticator;
+import com.miro.Laivanupotus.utils.UserMapper;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -118,14 +120,56 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Optional<User> findByUsername(String username) {
 		// TODO Auto-generated method stub
+
 		return userRepository.findByUserName(username);
 	}
+
+	@Override
+	public UserProfileDto findUserProfile(Long userId, String authHeader) {
+
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new RuntimeException("User not found!"));
+
+		String authToken = extractTokenFromHeader(authHeader);
+
+		boolean isUsersOwnProfile = isUsersOwnProfile(authToken,
+				user.getUserName());
+
+		if (isUsersOwnProfile) {
+			return UserMapper.userToOwnUserProfileDto(user);
+		} ;
+
+		return UserMapper.userToNotOwnUserProfileDto(user);
+
+	};
 
 	@Override
 	public UserDto userToDto(User user) {
 		UserDto userDto = new UserDto(user.getUserName(), user.getEmail());
 		return userDto;
 	}
+
+	public boolean isUsersOwnProfile(String token, String userName) {
+
+		System.out.println("The token in isUsersOwnProfile: " + token);
+
+		String userNameFromToken = tokenService.getUserNameFromToken(token);
+
+		return userNameFromToken.contentEquals(userName)
+				? true
+						: false;
+	}
+
+	public static String extractTokenFromHeader(String AuthHeader) {
+
+		if (AuthHeader != null && AuthHeader.startsWith("Bearer ")) {
+			return AuthHeader.substring(7);
+		} ;
+
+		return null;
+	};
+
+
 
 
 

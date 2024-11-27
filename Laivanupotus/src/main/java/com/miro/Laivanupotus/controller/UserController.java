@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.miro.Laivanupotus.dto.LoginRequestDto;
 import com.miro.Laivanupotus.dto.UserDto;
+import com.miro.Laivanupotus.interfaces.UserProfileDto;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.service.UserService;
 
@@ -45,8 +47,13 @@ public class UserController {
 	};
 
 	@GetMapping("/{userId}/profile")
-	public ResponseEntity<User> getUserProfile(@PathVariable Long userId) {
-		User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
-		return ResponseEntity.ok(user);
+	public ResponseEntity<UserProfileDto> getUserProfile(
+			@PathVariable Long userId,
+			@RequestHeader("Authorization") String authHeader) {
+
+		UserProfileDto userProfile = userService.findUserProfile(userId,
+				authHeader);
+
+		return ResponseEntity.ok(userProfile);
 	};
 }
