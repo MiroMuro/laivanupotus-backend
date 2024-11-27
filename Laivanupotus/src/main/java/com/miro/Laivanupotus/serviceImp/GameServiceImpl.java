@@ -6,14 +6,16 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.miro.Laivanupotus.dto.MatchResponseDto;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Match;
+import com.miro.Laivanupotus.model.Match.GameStatus;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.model.User;
-import com.miro.Laivanupotus.model.Match.GameStatus;
 import com.miro.Laivanupotus.repository.MatchRepository;
 import com.miro.Laivanupotus.service.GameService;
+import com.miro.Laivanupotus.utils.MatchMapper;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -26,7 +28,15 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public List<Match> findAvailableMatches() {
-		return matchRepository.findByStatus(GameStatus.WAITING_FOR_PLAYER);
+
+		List<Match> matches = matchRepository
+				.findByStatus(GameStatus.WAITING_FOR_PLAYER);
+
+		List<MatchResponseDto> matchDtos = MatchMapper.matchesToDto(matches);
+
+		System.out.println("Matches should be mapped to DTOs: " + matchDtos);
+
+		return matches;
 	}
 
 	@Override

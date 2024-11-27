@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.miro.Laivanupotus.dto.MatchResponseDto;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.service.GameService;
 import com.miro.Laivanupotus.service.UserService;
+import com.miro.Laivanupotus.utils.MatchMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,9 +56,11 @@ public class GameController {
 	};
 
 	@GetMapping("/available")
-	public ResponseEntity<List<Match>> getMathcesWaitingForSecondPlayer() {
+	public ResponseEntity<List<MatchResponseDto>> getMathcesWaitingForSecondPlayer() {
 		List<Match> availableMatches = gameService.findAvailableMatches();
-		return ResponseEntity.ok(availableMatches);
+		List<MatchResponseDto> availableMatchesDtos = MatchMapper
+				.matchesToDto(availableMatches);
+		return ResponseEntity.ok(availableMatchesDtos);
 	};
 
 	@GetMapping("/{matchId}")

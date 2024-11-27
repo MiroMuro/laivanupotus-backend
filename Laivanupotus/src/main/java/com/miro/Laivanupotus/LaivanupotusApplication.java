@@ -7,8 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class LaivanupotusApplication {
 
 	public static void main(String[] args) {
+		System.out.println("Initializing Laivanupotus.");
 		SpringApplication.run(LaivanupotusApplication.class, args);
-		System.out.println("Initializing Laivanupotus");
+		System.out.println("Laivanupotus initialized.");
 
 	}
 
