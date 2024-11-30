@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.miro.Laivanupotus.dto.MatchResponseDto;
+import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
+import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.service.GameService;
 import com.miro.Laivanupotus.service.UserService;
-import com.miro.Laivanupotus.utils.MatchMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,29 +38,37 @@ public class GameController {
 
 	//New game creation
 	@PostMapping("/create")
-	public ResponseEntity<Match> createGame(@RequestParam Long userId) {
+	public ResponseEntity<ActiveMatchResponseDto> createGame(
+			@RequestParam Long userId) {
 		User player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
 
-		Match newMatch = gameService.createMatch(player);
+		ActiveMatchResponseDto newMatchDto = gameService
+				.createMatch(player);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(newMatch);
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(newMatchDto);
 	};
 
 	@PostMapping("/{matchId}/join")
-	public ResponseEntity<Match> joinGame(@RequestParam Long userId, @PathVariable Long matchId) {
+	public ResponseEntity<ActiveMatchResponseDto> joinGame(
+			@RequestParam Long userId,
+			@PathVariable Long matchId) {
 		User player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
 
-		Match matchWithPlayersJoined = gameService.joinMatch(matchId, player);
+		ActiveMatchResponseDto matchWithPlayersJoined = gameService
+				.joinMatch(matchId, player);
 
 		return ResponseEntity.ok(matchWithPlayersJoined);
 	};
 
 	@GetMapping("/available")
-	public ResponseEntity<List<MatchResponseDto>> getMathcesWaitingForSecondPlayer() {
-		List<Match> availableMatches = gameService.findAvailableMatches();
-		List<MatchResponseDto> availableMatchesDtos = MatchMapper
-				.matchesToDto(availableMatches);
-		return ResponseEntity.ok(availableMatchesDtos);
+	public ResponseEntity<List<AvailableMatchResponseDto>> getMathcesWaitingForSecondPlayer() {
+		List<AvailableMatchResponseDto> availableMatches = gameService
+				.findAvailableMatches();
+
+		return ResponseEntity
+				.ok(availableMatches);
 	};
 
 	@GetMapping("/{matchId}")

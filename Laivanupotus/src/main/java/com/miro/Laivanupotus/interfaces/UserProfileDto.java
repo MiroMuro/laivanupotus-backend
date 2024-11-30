@@ -1,8 +1,7 @@
 package com.miro.Laivanupotus.interfaces;
 
+
 public interface UserProfileDto {
+	Long getId();
 	String getUserName();
-	int getTotalGames();
-	int getGamesWon();
-	int getGamesLost();
 }

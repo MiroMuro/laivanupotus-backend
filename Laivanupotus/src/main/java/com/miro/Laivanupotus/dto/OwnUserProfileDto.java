@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 @Builder
 public class OwnUserProfileDto implements UserProfileDto {
+	private Long id;
 	private String userName;
 	private String email;
 	private int totalGames;

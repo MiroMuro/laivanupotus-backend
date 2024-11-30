@@ -2,6 +2,8 @@ package com.miro.Laivanupotus.model;
 
 import java.time.LocalDateTime;
 
+import com.miro.Laivanupotus.interfaces.UserProfileDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +20,7 @@ import lombok.Setter;
 @Data
 @Getter
 @Setter
-public class User {
+public class User implements UserProfileDto {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

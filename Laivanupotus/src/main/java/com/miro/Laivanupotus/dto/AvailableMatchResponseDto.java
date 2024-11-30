@@ -1,6 +1,8 @@
 package com.miro.Laivanupotus.dto;
 
-import com.miro.Laivanupotus.model.Match.GameStatus;
+
+
+import com.miro.Laivanupotus.Enums.GameStatus;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,7 +14,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class MatchResponseDto {
+public class AvailableMatchResponseDto {
 	private Long id;
 	private String player1UserName;
 	private String player2UserName;

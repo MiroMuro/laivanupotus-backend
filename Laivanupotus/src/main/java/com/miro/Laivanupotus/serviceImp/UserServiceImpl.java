@@ -102,7 +102,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void logoutUser(User user) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -119,7 +118,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<User> findByUsername(String username) {
-		// TODO Auto-generated method stub
 
 		return userRepository.findByUserName(username);
 	}
@@ -135,6 +133,7 @@ public class UserServiceImpl implements UserService {
 		boolean isUsersOwnProfile = isUsersOwnProfile(authToken,
 				user.getUserName());
 
+		// Info depends on if the client is queryings its own profile.
 		if (isUsersOwnProfile) {
 			return UserMapper.userToOwnUserProfileDto(user);
 		} ;

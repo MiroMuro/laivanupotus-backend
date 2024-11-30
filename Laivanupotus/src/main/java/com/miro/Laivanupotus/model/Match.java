@@ -2,6 +2,8 @@ package com.miro.Laivanupotus.model;
 
 import java.time.LocalDateTime;
 
+import com.miro.Laivanupotus.Enums.GameStatus;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,8 +50,6 @@ public class Match {
 	private LocalDateTime updatedAt;
 	private LocalDateTime endedAt;
 
-	public enum GameStatus {
-		WAITING_FOR_PLAYER, PLACING_SHIPS, IN_PROGRESS, FINISHED
-	}
+
 
 }

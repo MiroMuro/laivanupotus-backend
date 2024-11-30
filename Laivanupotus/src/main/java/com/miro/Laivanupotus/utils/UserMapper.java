@@ -1,8 +1,10 @@
 package com.miro.Laivanupotus.utils;
 
+import com.miro.Laivanupotus.dto.IngameUserProfileDto;
 import com.miro.Laivanupotus.dto.NotOwnUserProfileDto;
 import com.miro.Laivanupotus.dto.OwnUserProfileDto;
 import com.miro.Laivanupotus.dto.UserDto;
+import com.miro.Laivanupotus.interfaces.UserProfileDto;
 import com.miro.Laivanupotus.model.User;
 
 public class UserMapper {
@@ -11,7 +13,16 @@ public class UserMapper {
 		UserDto userDto = new UserDto(user.getUserName(), user.getEmail());
 		return userDto;
 	}
-
+	public static UserProfileDto userToIngameUserProfileDto(
+			UserProfileDto userProfileDto) {
+		return IngameUserProfileDto
+				.builder()
+				.id(userProfileDto
+						.getId())
+				.userName(userProfileDto
+						.getUserName())
+				.build();
+	}
 	public static NotOwnUserProfileDto userToNotOwnUserProfileDto(User user) {
 		return NotOwnUserProfileDto.builder()
 				.userName(user.getUserName())

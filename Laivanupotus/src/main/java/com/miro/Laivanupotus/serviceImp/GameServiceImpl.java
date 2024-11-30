@@ -6,10 +6,11 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.miro.Laivanupotus.dto.MatchResponseDto;
+import com.miro.Laivanupotus.Enums.GameStatus;
+import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
+import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Match;
-import com.miro.Laivanupotus.model.Match.GameStatus;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.model.User;
@@ -27,24 +28,26 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public List<Match> findAvailableMatches() {
+	public List<AvailableMatchResponseDto> findAvailableMatches() {
 
 		List<Match> matches = matchRepository
 				.findByStatus(GameStatus.WAITING_FOR_PLAYER);
 
-		List<MatchResponseDto> matchDtos = MatchMapper.matchesToDto(matches);
+		List<AvailableMatchResponseDto> matchDtos = MatchMapper
+				.matchesToDto(matches);
 
-		System.out.println("Matches should be mapped to DTOs: " + matchDtos);
+		;
 
-		return matches;
+		return matchDtos;
 	}
 
 	@Override
-	public Match joinMatch(Long matchId, User player) {
+	public ActiveMatchResponseDto joinMatch(Long matchId, User player) {
 		Match matchRequiringPlayer2 = matchRepository.findById(matchId)
 				.orElseThrow(() -> new RuntimeException("Match not found!"));
 
-		if (matchRequiringPlayer2.getStatus() != Match.GameStatus.WAITING_FOR_PLAYER) {
+		if (matchRequiringPlayer2
+				.getStatus() != GameStatus.WAITING_FOR_PLAYER) {
 			throw new RuntimeException("Match is not waiting for a player!");
 		}
 
@@ -52,7 +55,8 @@ public class GameServiceImpl implements GameService {
 			throw new RuntimeException("You cannot join your own match!");
 		}
 
-		matchRequiringPlayer2.setPlayer2(player);
+		matchRequiringPlayer2
+		.setPlayer2(player);
 		matchRequiringPlayer2.setStatus(GameStatus.PLACING_SHIPS);
 		matchRequiringPlayer2.setUpdatedAt(LocalDateTime.now());
 
@@ -60,7 +64,12 @@ public class GameServiceImpl implements GameService {
 		player2Board.setBoardState(".".repeat(100));
 		matchRequiringPlayer2.setPlayer2Board(player2Board);
 
-		return matchRepository.save(matchRequiringPlayer2);
+		matchRepository.save(matchRequiringPlayer2);
+
+		ActiveMatchResponseDto matchDto = MatchMapper
+				.matchToActiveMatchResponseDto(matchRequiringPlayer2);
+
+		return matchDto;
 	}
 
 	@Override
@@ -128,9 +137,10 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public Match createMatch(User player) {
+	public ActiveMatchResponseDto createMatch(User player) {
 		Match newMatch = new Match();
-		newMatch.setPlayer1(player);
+		newMatch
+		.setPlayer1(player);
 		newMatch.setStatus(GameStatus.WAITING_FOR_PLAYER);
 		newMatch.setStartTime(LocalDateTime.now());
 		newMatch.setUpdatedAt(LocalDateTime.now());
@@ -139,7 +149,14 @@ public class GameServiceImpl implements GameService {
 		Board player1Board = new Board();
 		player1Board.setBoardState(".".repeat(100));
 		newMatch.setPlayer1Board(player1Board);
-		return matchRepository.save(newMatch);
+
+		matchRepository
+		.save(newMatch);
+
+		ActiveMatchResponseDto matchDto = MatchMapper
+				.matchToActiveMatchResponseDto(newMatch);
+
+		return matchDto;
 	}
 
 	private void updateBoardState(Board targetBoard, Ship ship) {

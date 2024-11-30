@@ -51,8 +51,9 @@ public class UserController {
 			@PathVariable Long userId,
 			@RequestHeader("Authorization") String authHeader) {
 
-		UserProfileDto userProfile = userService.findUserProfile(userId,
-				authHeader);
+		// Return user profile info.
+		UserProfileDto userProfile = userService
+				.findUserProfile(userId, authHeader);
 
 		return ResponseEntity.ok(userProfile);
 	};

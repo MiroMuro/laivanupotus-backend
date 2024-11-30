@@ -31,10 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String token = extractTokenFromHeader(request);
 
-		System.out.println(
-				"The token in question, without header name I suppose: "
-						+ token);
-
 		if (token != null && tokenService.validateToken(token)) {
 
 			String username = tokenService.getUserNameFromToken(token);

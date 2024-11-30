@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
+import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Ship;
@@ -12,9 +14,9 @@ import com.miro.Laivanupotus.model.User;
 
 @Service
 public interface GameService {
-	List<Match> findAvailableMatches();
+	List<AvailableMatchResponseDto> findAvailableMatches();
 
-	Match joinMatch(Long matchId, User player);
+	ActiveMatchResponseDto joinMatch(Long matchId, User player);
 
 	Optional<Match> getMatchById(Long matchId);
 
@@ -22,5 +24,5 @@ public interface GameService {
 
 	Move makeMove(Long matchId, Long playerId, Move move);
 
-	Match createMatch(User player);
+	ActiveMatchResponseDto createMatch(User player);
 }
