@@ -89,7 +89,10 @@ public class GameServiceImpl implements GameService {
 
 		for (Ship ship : ships) {
 			if (!board.isValidPlacement(ship)) {
-				throw new RuntimeException("Invalid ship placement");
+				throw new RuntimeException(
+						"Invalid ship placement! Check your " + ship
+								.getType()
+								.toString() + " placement.");
 			}
 			;
 			board.getShips().add(ship);

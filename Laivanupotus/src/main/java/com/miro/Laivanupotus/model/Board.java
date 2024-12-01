@@ -36,16 +36,25 @@ public class Board {
 	@Column(length = 100)
 	private String boardState;
 
+	@ElementCollection
+	private List<Coordinate> allShipsCoords;
 	public boolean isValidPlacement(Ship ship) {
 		System.out
-				.println("Ship type: " + ship
+		.println("Ship type: " + ship
 				.getType()
 		.toString());
 		List<Coordinate> shipCoords = getShipsCoordinatesOnBoard(ship);
 		System.out
-				.println("COORDS:" + shipCoords);
-		// Todo: implement
-		return true;
+		.println("COORDS:" + shipCoords);
+		boolean isOverlappingCoordinates = shipsCoordinatesOverlap(shipCoords);
+
+		if (!isOverlappingCoordinates) {
+			allShipsCoords
+			.addAll(shipCoords);
+			return true;
+		}
+
+		return false;
 	}
 
 	public boolean makeAMove(Move move) {
@@ -97,5 +106,17 @@ public class Board {
 		}
 		return coordinates;
 
+	};
+
+	public boolean shipsCoordinatesOverlap(List<Coordinate> currentShipCoords) {
+
+		for (Coordinate shipCoords : currentShipCoords) {
+			if (allShipsCoords
+					.contains(shipCoords)) {
+				return true;
+			}
+		}
+
+		return false;
 	};
 }
