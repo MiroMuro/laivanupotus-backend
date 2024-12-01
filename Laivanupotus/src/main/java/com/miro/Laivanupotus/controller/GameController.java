@@ -1,12 +1,14 @@
 package com.miro.Laivanupotus.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,10 +81,19 @@ public class GameController {
 	};
 
 	@PostMapping("/{matchId}/place-ships")
-	public ResponseEntity<Match> placeShips(@PathVariable Long matchId, @RequestParam Long playerId,
-			@RequestParam List<Ship> ships) {
-		Match updatedMatchWithShips = gameService.placeShips(matchId, playerId, ships);
-		return ResponseEntity.ok(updatedMatchWithShips);
+	public ResponseEntity<Match> placeShips(@PathVariable Long matchId,
+			@RequestParam Long userId,
+			@RequestBody Map<String, List<Ship>> payload) {
+		List<Ship> ships = payload
+				.get("ships");
+		System.out
+		.println("THE SHIPPENS: " + ships);
+		Match updatedMatchWithShips = gameService
+				.placeShips(matchId, userId, ships);
+		// return ResponseEntity.ok(updatedMatchWithShips);
+
+		return ResponseEntity
+				.ok(updatedMatchWithShips);
 	};
 
 	@PostMapping("/{matchId}/make-move")

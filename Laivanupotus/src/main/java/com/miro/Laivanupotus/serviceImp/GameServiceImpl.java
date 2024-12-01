@@ -164,12 +164,20 @@ public class GameServiceImpl implements GameService {
 		int length = ship.getType().getLength();
 
 		for (int i = 0; i < length; i++) {
-			int x = ship.getX() + (ship.isVertical() ? 0 : i);
-			int y = ship.getY() + (ship.isVertical() ? i : 0);
-			board[x][y] = 'S';
+			int x = ship
+					.getX()
+					+ (ship
+							.isVertical() ? 0 : i);
+			int y = ship
+					.getY()
+					+ (ship
+							.isVertical() ? i : 0);
+			board[y][x] = 'S';
 		}
 
-		System.out.println("board: " + board);
+		System.out
+		.println("board: " + board
+				.toString());
 
 		targetBoard.setBoardState(convertBoardToString(board));
 	};
@@ -224,6 +232,15 @@ public class GameServiceImpl implements GameService {
 			for (int j = 0; j < 10; j++) {
 				board[i][j] = boardState.charAt(i * 10 + j);
 			}
+		}
+
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				System.out
+				.print(board[i][j] + " ");
+			}
+			System.out
+			.println(); // Move to the next line after each row
 		}
 
 		return board;

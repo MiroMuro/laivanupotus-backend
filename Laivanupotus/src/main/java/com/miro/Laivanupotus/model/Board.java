@@ -1,5 +1,6 @@
 package com.miro.Laivanupotus.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -36,6 +37,13 @@ public class Board {
 	private String boardState;
 
 	public boolean isValidPlacement(Ship ship) {
+		System.out
+				.println("Ship type: " + ship
+				.getType()
+		.toString());
+		List<Coordinate> shipCoords = getShipsCoordinatesOnBoard(ship);
+		System.out
+				.println("COORDS:" + shipCoords);
 		// Todo: implement
 		return true;
 	}
@@ -64,4 +72,30 @@ public class Board {
 		;
 		return hits == length;
 	}
+	public List<Coordinate> getShipsCoordinatesOnBoard(Ship ship) {
+		int x = ship.getX();
+		int y = ship.getY();
+		boolean isVertical = ship.isVertical();
+		int length = ship.getType().getLength();
+
+		ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>();
+
+		if (isVertical) {
+			for (int i = 0; i < length; i++) {
+
+				coordinates
+				.add(new Coordinate(x, y + i));
+			}
+
+			return coordinates;
+		}
+
+		for (int i = 0; i < length; i++) {
+
+			coordinates
+			.add(new Coordinate(x + i, y));
+		}
+		return coordinates;
+
+	};
 }
