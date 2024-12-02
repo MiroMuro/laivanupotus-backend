@@ -91,8 +91,8 @@ public class GameServiceImpl implements GameService {
 			if (!board.isValidPlacement(ship)) {
 				throw new RuntimeException(
 						"Invalid ship placement! Check your " + ship
-								.getType()
-								.toString() + " placement.");
+						.getType()
+						.toString() + " placement.");
 			}
 			;
 			board.getShips().add(ship);
@@ -178,9 +178,7 @@ public class GameServiceImpl implements GameService {
 			board[y][x] = 'S';
 		}
 
-		System.out
-		.println("board: " + board
-				.toString());
+		printBoardToConsole(board);
 
 		targetBoard.setBoardState(convertBoardToString(board));
 	};
@@ -190,23 +188,36 @@ public class GameServiceImpl implements GameService {
 		// S = ship, H = hit, M = miss, . = empty
 		char[][] board = convertStringToBoard(targetBoard.getBoardState());
 
-		if (board[move.getX()][move.getY()] == 'H') {
+		if (board[move
+		          .getY()][move
+		                   .getX()] == 'H') {
 			return false;
 		}
 		;
 
 		// Check if the shot that hit sunk any ships.
-		if (board[move.getX()][move.getY()] == 'S') {
-			board[move.getX()][move.getY()] = 'H';
+		if (board[move
+		          .getY()][move
+		                   .getX()] == 'S') {
+			board[move
+			      .getY()][move
+			               .getX()] = 'H';
 			for(Ship ship : targetBoard.getShips()) {
 				ship.setSunk(targetBoard.isShipSunk(ship));
-				return true;
 			}
+			targetBoard
+			.setBoardState(convertBoardToString(board));
+			printBoardToConsole(board);
+			return true;
 		}
 		;
 
-		board[move.getX()][move.getY()] = 'M';
-		System.out.println("board after move: " + board);
+		board[move
+		      .getY()][move
+		               .getX()] = 'M';
+		targetBoard
+		.setBoardState(convertBoardToString(board));
+		printBoardToConsole(board);
 		return false;
 	};
 
@@ -237,14 +248,7 @@ public class GameServiceImpl implements GameService {
 			}
 		}
 
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				System.out
-				.print(board[i][j] + " ");
-			}
-			System.out
-			.println(); // Move to the next line after each row
-		}
+
 
 		return board;
 	};
@@ -266,6 +270,17 @@ public class GameServiceImpl implements GameService {
 		// Check if all ships are sunk
 		return board.getShips().stream().allMatch(ship -> board.isShipSunk(ship));
 	};
+
+	private void printBoardToConsole(char[][] board) {
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				System.out
+				.print(board[i][j] + " ");
+			}
+			System.out
+			.println(); // Move to the next line after each row
+		}
+	}
 
 
 

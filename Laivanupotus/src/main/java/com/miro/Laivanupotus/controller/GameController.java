@@ -38,7 +38,6 @@ public class GameController {
 
 
 
-	//New game creation
 	@PostMapping("/create")
 	public ResponseEntity<ActiveMatchResponseDto> createGame(
 			@RequestParam Long userId) {
@@ -86,8 +85,7 @@ public class GameController {
 			@RequestBody Map<String, List<Ship>> payload) {
 		List<Ship> ships = payload
 				.get("ships");
-		System.out
-		.println("THE SHIPPENS: " + ships);
+
 		Match updatedMatchWithShips = gameService
 				.placeShips(matchId, userId, ships);
 		// return ResponseEntity.ok(updatedMatchWithShips);
@@ -97,9 +95,11 @@ public class GameController {
 	};
 
 	@PostMapping("/{matchId}/make-move")
-	public ResponseEntity<Move> makeMove(@PathVariable Long matchId, @RequestParam Long playerId,
-			@RequestParam Move move) {
-		Move resultMove = gameService.makeMove(matchId, playerId, move);
+	public ResponseEntity<Move> makeMove(@PathVariable Long matchId,
+			@RequestParam Long userId,
+			@RequestBody Move move) {
+		Move resultMove = gameService
+				.makeMove(matchId, userId, move);
 
 		return ResponseEntity.ok(resultMove);
 	};
