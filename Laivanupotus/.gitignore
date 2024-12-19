@@ -37,3 +37,4 @@ application.properties
 application-local.properties
 application-dev.properties
 application-prod.properties
+postgre config.txt

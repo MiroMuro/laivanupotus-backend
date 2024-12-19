@@ -41,9 +41,9 @@ public class SecurityConfig {
 		.addFilterBefore(
 				new JwtAuthenticationFilter(tokenService,
 						userDetailsService),
-						UsernamePasswordAuthenticationFilter.class)
+				UsernamePasswordAuthenticationFilter.class)
 		.cors(cors -> cors
-						.configurationSource(corsConfigurationSource()));
+				.configurationSource(corsConfigurationSource()));
 
 		return http.build();
 	};
@@ -52,18 +52,20 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration
-				.setAllowedOrigins(Arrays
-						.asList("http://localhost:5173"));
+		.setAllowedOrigins(Arrays
+				.asList("http://localhost:5173"));
 		configuration
-				.setAllowedMethods(Arrays
-						.asList("GET", "POST", "OPTIONS"));
+		.setAllowedMethods(Arrays
+				.asList("GET", "POST", "OPTIONS"));
 		configuration
-				.setAllowedHeaders(Arrays
-						.asList("*"));
-
+		.setAllowedHeaders(Arrays
+				.asList("*"));
+		configuration
+				.setExposedHeaders(Arrays
+						.asList("Authorization"));
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source
-				.registerCorsConfiguration("/api/**", configuration);
+		.registerCorsConfiguration("/api/**", configuration);
 		return source;
 	}
 }
