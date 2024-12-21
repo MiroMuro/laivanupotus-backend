@@ -3,8 +3,8 @@ package com.miro.Laivanupotus.serviceImp;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -12,7 +12,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.miro.Laivanupotus.dto.LoginRequestDto;
+import com.miro.Laivanupotus.dto.OwnUserProfileDto;
 import com.miro.Laivanupotus.dto.UserDto;
+import com.miro.Laivanupotus.exceptions.AuthenticationFailedException;
+import com.miro.Laivanupotus.exceptions.InvalidPasswordException;
+import com.miro.Laivanupotus.exceptions.UserNotFoundException;
 import com.miro.Laivanupotus.interfaces.UserProfileDto;
 import com.miro.Laivanupotus.model.User;
 import com.miro.Laivanupotus.repository.UserRepository;
@@ -56,45 +60,71 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseEntity<String> loginUser(LoginRequestDto loginDto) {
+	public ResponseEntity<OwnUserProfileDto> loginUser(
+			LoginRequestDto loginDto) throws AuthenticationFailedException {
 
 		String userName = loginDto.getUserName();
 		String password = loginDto.getPassword();
 
-		System.out.println("THE UUSERNAME IN QUESTION: " + userName);
 
-		User userToLogin = userRepository.findByUserName(userName)
-				.orElseThrow(() -> new RuntimeException("User not found"));
-
-		if (!passwordEncoder.matches(password, userToLogin.getPassword())) {
-			throw new RuntimeException("Invalid password");
-		}
-		;
-
-		ResponseEntity<String> loginResponse = getLoginAuthResponse(userName, password);
-
-		userToLogin.setLastLogin(LocalDateTime.now());
-		userRepository.save(userToLogin);
-
-		return loginResponse;
-	}
-
-	public ResponseEntity<String> getLoginAuthResponse(String userName, String password) {
 		try {
-			Authentication auth = userAuthenticator.attemptAuthentication(userName, password);
-			String loginAuthToken = tokenService.generateToken(auth);
+
+			if (userName == null || userName
+					.trim().isEmpty() || password == null || password
+					.trim().isEmpty()) {
+				throw new IllegalArgumentException(
+						"Username and password cannot be empty");
+			}
+
+			User userToLogin = userRepository
+					.findByUserName(userName)
+					.orElseThrow(() -> new UserNotFoundException(
+							"User not found" + userName));
+
+			if (!passwordEncoder
+					.matches(password, userToLogin
+							.getPassword())) {
+				throw new InvalidPasswordException(
+						"Invalid password for user " + userName);
+			} ;
+
+
+
+			Authentication auth = userAuthenticator
+					.attemptAuthentication(userName, password);
+
+			String loginAuthToken = tokenService
+					.generateToken(auth);
 
 			HttpHeaders authHeader = createAuthHeadersWithToken(loginAuthToken);
 
-			return ResponseEntity.ok().headers(authHeader).body("Login succesful!");
+			OwnUserProfileDto userProfileLoginResponse = UserMapper
+					.userToOwnUserProfileDto(userToLogin);
+			try {
+				userToLogin
+				.setLastLogin(LocalDateTime
+						.now());
+				userRepository
+				.save(userToLogin);
+			} catch (DataAccessException e) {
+				System.out
+				.println(
+						"Failed to update last login time for user: {}"
+								+ userName + e);
+			} ;
 
+			return ResponseEntity
+					.ok().headers(authHeader).body(userProfileLoginResponse);
 		} catch (AuthenticationException e) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+			throw new AuthenticationFailedException(
+					"Authentication failed for user: " + userName);
+		} catch (DataAccessException e) {
+			throw new AuthenticationFailedException(
+					"System error during authentication" + e);
 		}
+	}
 
-	};
-
-	public HttpHeaders createAuthHeadersWithToken(String token) {
+	HttpHeaders createAuthHeadersWithToken(String token) {
 		HttpHeaders authHeader = new HttpHeaders();
 		authHeader.add("Authorization", "Bearer " + token);
 		return authHeader;
@@ -126,7 +156,8 @@ public class UserServiceImpl implements UserService {
 	public UserProfileDto findUserProfile(Long userId, String authHeader) {
 
 		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new RuntimeException("User not found!"));
+				.orElseThrow(() -> new UserNotFoundException(
+						"User not with ID: " + userId + " not found!"));
 
 		String authToken = extractTokenFromHeader(authHeader);
 

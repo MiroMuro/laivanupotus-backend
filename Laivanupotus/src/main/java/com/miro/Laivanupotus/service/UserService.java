@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.miro.Laivanupotus.dto.LoginRequestDto;
+import com.miro.Laivanupotus.dto.OwnUserProfileDto;
 import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.interfaces.UserProfileDto;
 import com.miro.Laivanupotus.model.User;
@@ -18,7 +19,7 @@ public interface UserService {
 
 	User registerUser(User user);
 
-	ResponseEntity<String> loginUser(LoginRequestDto loginDto);
+	ResponseEntity<OwnUserProfileDto> loginUser(LoginRequestDto loginDto);
 
 	UserDto userToDto(User user);
 
