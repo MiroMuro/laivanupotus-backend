@@ -1,6 +1,7 @@
 package com.miro.Laivanupotus.serviceImp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.dao.DataAccessException;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.miro.Laivanupotus.dto.LoginRequestDto;
+import com.miro.Laivanupotus.dto.NotOwnUserProfileDto;
 import com.miro.Laivanupotus.dto.OwnUserProfileDto;
 import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.exceptions.AuthenticationFailedException;
@@ -79,13 +81,13 @@ public class UserServiceImpl implements UserService {
 			User userToLogin = userRepository
 					.findByUserName(userName)
 					.orElseThrow(() -> new UserNotFoundException(
-							"User not found" + userName));
+						"User not found" + userName));
 
 			if (!passwordEncoder
 					.matches(password, userToLogin
-							.getPassword())) {
+						.getPassword())) {
 				throw new InvalidPasswordException(
-						"Invalid password for user " + userName);
+					"Invalid password for user " + userName);
 			} ;
 
 
@@ -103,24 +105,24 @@ public class UserServiceImpl implements UserService {
 			try {
 				userToLogin
 				.setLastLogin(LocalDateTime
-						.now());
+					.now());
 				userRepository
 				.save(userToLogin);
 			} catch (DataAccessException e) {
 				System.out
 				.println(
-						"Failed to update last login time for user: {}"
-								+ userName + e);
+					"Failed to update last login time for user: {}"
+							+ userName + e);
 			} ;
 
 			return ResponseEntity
 					.ok().headers(authHeader).body(userProfileLoginResponse);
 		} catch (AuthenticationException e) {
 			throw new AuthenticationFailedException(
-					"Authentication failed for user: " + userName);
+				"Authentication failed for user: " + userName);
 		} catch (DataAccessException e) {
 			throw new AuthenticationFailedException(
-					"System error during authentication" + e);
+				"System error during authentication" + e);
 		}
 	}
 
@@ -157,12 +159,12 @@ public class UserServiceImpl implements UserService {
 
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException(
-						"User not with ID: " + userId + " not found!"));
+					"User not with ID: " + userId + " not found!"));
 
 		String authToken = extractTokenFromHeader(authHeader);
 
 		boolean isUsersOwnProfile = isUsersOwnProfile(authToken,
-				user.getUserName());
+			user.getUserName());
 
 		// Info depends on if the client is queryings its own profile.
 		if (isUsersOwnProfile) {
@@ -199,6 +201,14 @@ public class UserServiceImpl implements UserService {
 		return null;
 	};
 
+	@Override
+	public ResponseEntity<List<NotOwnUserProfileDto>> findAllUsersForLeaderboard() {
+		List<User> allUsers = userRepository.findAll();
+		List<NotOwnUserProfileDto> allDtoUsers = UserMapper
+			.usersToNotOwnUserProfileDto(allUsers);
+		return ResponseEntity.ok(allDtoUsers);
+
+	}
 
 
 

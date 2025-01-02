@@ -1,5 +1,8 @@
 package com.miro.Laivanupotus.utils;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.miro.Laivanupotus.dto.IngameUserProfileDto;
 import com.miro.Laivanupotus.dto.NotOwnUserProfileDto;
 import com.miro.Laivanupotus.dto.OwnUserProfileDto;
@@ -18,9 +21,9 @@ public class UserMapper {
 		return IngameUserProfileDto
 				.builder()
 				.id(userProfileDto
-						.getId())
+					.getId())
 				.userName(userProfileDto
-						.getUserName())
+					.getUserName())
 				.build();
 	}
 	public static NotOwnUserProfileDto userToNotOwnUserProfileDto(User user) {
@@ -35,6 +38,8 @@ public class UserMapper {
 
 	public static OwnUserProfileDto userToOwnUserProfileDto(User user) {
 		return OwnUserProfileDto.builder()
+				.id(user
+					.getId())
 				.userName(user.getUserName())
 				.email(user.getEmail())
 				.totalGames(user.getTotalGames())
@@ -43,4 +48,10 @@ public class UserMapper {
 				.createdAt(user.getCreatedAt())
 				.build();
 	};
+
+	public static List<NotOwnUserProfileDto> usersToNotOwnUserProfileDto(
+			List<User> users) {
+		return users.stream().map((user) -> userToNotOwnUserProfileDto(user))
+			.collect(Collectors.toList());
+	}
 }

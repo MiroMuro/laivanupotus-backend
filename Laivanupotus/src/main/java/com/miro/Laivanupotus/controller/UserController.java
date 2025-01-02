@@ -1,5 +1,7 @@
 package com.miro.Laivanupotus.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.miro.Laivanupotus.dto.LoginRequestDto;
+import com.miro.Laivanupotus.dto.NotOwnUserProfileDto;
 import com.miro.Laivanupotus.dto.OwnUserProfileDto;
 import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.interfaces.UserProfileDto;
@@ -59,5 +62,9 @@ public class UserController {
 				.findUserProfile(userId, authHeader);
 
 		return ResponseEntity.ok(userProfile);
+	};
+	@GetMapping("/leaderboard")
+	public ResponseEntity<List<NotOwnUserProfileDto>> getLeaderBoardUserDtoProfiles() {
+		return userService.findAllUsersForLeaderboard();
 	};
 }
