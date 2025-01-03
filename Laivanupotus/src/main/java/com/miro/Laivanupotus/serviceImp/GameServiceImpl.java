@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
+import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
@@ -52,7 +53,7 @@ public class GameServiceImpl implements GameService {
 		}
 
 		if (matchRequiringPlayer2.getPlayer1().getId().equals(player.getId())) {
-			throw new RuntimeException("You cannot join your own match!");
+			throw new OwnGameJoinException("You cannot join your own match!");
 		}
 
 		matchRequiringPlayer2
@@ -90,9 +91,9 @@ public class GameServiceImpl implements GameService {
 		for (Ship ship : ships) {
 			if (!board.isValidPlacement(ship)) {
 				throw new RuntimeException(
-						"Invalid ship placement! Check your " + ship
-						.getType()
-						.toString() + " placement.");
+					"Invalid ship placement! Check your " + ship
+					.getType()
+					.toString() + " placement.");
 			}
 			;
 			board.getShips().add(ship);
@@ -233,7 +234,7 @@ public class GameServiceImpl implements GameService {
 		;
 
 		match.setCurrentTurnPlayerId(
-				userId.equals(match.getPlayer1().getId()) ? match.getPlayer2().getId() : match.getPlayer1().getId());
+			userId.equals(match.getPlayer1().getId()) ? match.getPlayer2().getId() : match.getPlayer1().getId());
 
 		match.setUpdatedAt(LocalDateTime.now());
 
