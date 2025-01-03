@@ -103,5 +103,6 @@ public class GameController {
 
 		return ResponseEntity.ok(resultMove);
 	};
-
+	// Todo. Implement Leave match functionality.
+	// @PostMapping("/{matchId}/leave")
 }

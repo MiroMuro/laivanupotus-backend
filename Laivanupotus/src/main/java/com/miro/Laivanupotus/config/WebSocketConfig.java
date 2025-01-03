@@ -12,13 +12,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		registry.enableSimpleBroker("/topic", "/queue");
+		// Memory based message broker to send messages to clients
+		// Clients will subscribe to these destinations to receive updates.
+		registry.enableSimpleBroker("/topic");
+		// Prefix for messages FROM clients
 		registry.setApplicationDestinationPrefixes("/app");
 	};
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/ws-battleship").setAllowedOrigins("http://localhost:3000").withSockJS();
+		registry.addEndpoint("/ws-battleship")
+		.setAllowedOrigins("http://localhost:5173").withSockJS();
 	};
 
 }
