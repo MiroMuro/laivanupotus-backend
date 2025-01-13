@@ -29,10 +29,10 @@ public class Match {
 	private Long id;
 
 	@ManyToOne
-	private User player1;
+	private Player player1;
 
 	@ManyToOne
-	private User player2;
+	private Player player2;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	private Board player1Board;

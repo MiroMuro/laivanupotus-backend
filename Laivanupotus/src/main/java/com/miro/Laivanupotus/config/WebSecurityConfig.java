@@ -9,15 +9,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 // This class is used to configure the password encoder for the UserServiceImpl.
 @Configuration
 public class WebSecurityConfig {
-	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public static BCryptPasswordEncoder passwordEncoder() {
+	return new BCryptPasswordEncoder();
+    }
 
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfig)
-			throws Exception {
-		return authenticationConfig.getAuthenticationManager();
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfig)
+	    throws Exception {
+	return authenticationConfig.getAuthenticationManager();
 
-	};
+    };
 }

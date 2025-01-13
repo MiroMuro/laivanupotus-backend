@@ -10,13 +10,13 @@ import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Ship;
-import com.miro.Laivanupotus.model.User;
+import com.miro.Laivanupotus.model.Player;
 
 @Service
 public interface GameService {
 	List<AvailableMatchResponseDto> findAvailableMatches();
 
-	ActiveMatchResponseDto joinMatch(Long matchId, User player);
+	ActiveMatchResponseDto joinMatch(Long matchId, Player player);
 
 	Optional<Match> getMatchById(Long matchId);
 
@@ -24,5 +24,5 @@ public interface GameService {
 
 	Move makeMove(Long matchId, Long playerId, Move move);
 
-	ActiveMatchResponseDto createMatch(User player);
+	ActiveMatchResponseDto createMatch(Player player);
 }

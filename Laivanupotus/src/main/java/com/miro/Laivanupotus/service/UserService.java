@@ -11,23 +11,23 @@ import com.miro.Laivanupotus.dto.NotOwnUserProfileDto;
 import com.miro.Laivanupotus.dto.OwnUserProfileDto;
 import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.interfaces.UserProfileDto;
-import com.miro.Laivanupotus.model.User;
+import com.miro.Laivanupotus.model.Player;
 
 @Service
 public interface UserService {
-	Optional<User> findById(Long userId);
+	Optional<Player> findById(Long userId);
 
-	Optional<User> findByUsername(String username);
+	Optional<Player> findByUsername(String username);
 
-	User registerUser(User user);
+	Player registerUser(Player user);
 
 	ResponseEntity<OwnUserProfileDto> loginUser(LoginRequestDto loginDto);
 
 	ResponseEntity<List<NotOwnUserProfileDto>> findAllUsersForLeaderboard();
 
-	UserDto userToDto(User user);
+	UserDto userToDto(Player user);
 
-	void logoutUser(User user);
+	void logoutUser(Player user);
 
 	UserProfileDto findUserProfile(Long userId, String authToken);
 }

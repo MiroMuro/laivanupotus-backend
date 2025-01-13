@@ -14,7 +14,7 @@ import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Ship;
-import com.miro.Laivanupotus.model.User;
+import com.miro.Laivanupotus.model.Player;
 import com.miro.Laivanupotus.repository.MatchRepository;
 import com.miro.Laivanupotus.service.GameService;
 import com.miro.Laivanupotus.utils.MatchMapper;
@@ -33,7 +33,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<AvailableMatchResponseDto> findAvailableMatches() {
-
+	System.out.println("Finding available matches");
 	List<Match> matches = matchRepository
 		.findByStatus(GameStatus.WAITING_FOR_PLAYER);
 
@@ -46,7 +46,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public ActiveMatchResponseDto joinMatch(Long matchId, User player) {
+    public ActiveMatchResponseDto joinMatch(Long matchId, Player player) {
 	Match matchRequiringPlayer2 = matchRepository.findById(matchId)
 		.orElseThrow(() -> new RuntimeException("Match not found!"));
 
@@ -149,7 +149,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public ActiveMatchResponseDto createMatch(User player) {
+    public ActiveMatchResponseDto createMatch(Player player) {
 	Match newMatch = new Match();
 	newMatch
 	.setPlayer1(player);

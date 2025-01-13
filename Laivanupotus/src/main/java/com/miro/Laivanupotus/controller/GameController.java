@@ -3,6 +3,8 @@ package com.miro.Laivanupotus.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,91 +20,92 @@ import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Ship;
-import com.miro.Laivanupotus.model.User;
+import com.miro.Laivanupotus.model.Player;
 import com.miro.Laivanupotus.service.GameService;
 import com.miro.Laivanupotus.service.UserService;
+import com.miro.Laivanupotus.utils.UserAuthenticator;
 
 import lombok.RequiredArgsConstructor;
 
 
 @RestController
 @RequestMapping("/api/game")
-/*
- * Generates a constructor with required arguments.
- * Required arguments are final fields and fields with constraints such as {@code @NonNull}.
- */
 @RequiredArgsConstructor
 public class GameController {
-	private final GameService gameService;
-	private final UserService userService;
+    private static final Logger logger = LoggerFactory.getLogger(GameController.class);
+    private final GameService gameService;
+    private final UserService userService;
 
 
 
-	@PostMapping("/create")
-	public ResponseEntity<ActiveMatchResponseDto> createGame(
-			@RequestParam Long userId) {
-		User player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
+    @PostMapping("/create")
+    public ResponseEntity<ActiveMatchResponseDto> createGame(
+	    @RequestParam Long userId) {
+	Player player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
 
-		ActiveMatchResponseDto newMatchDto = gameService
-				.createMatch(player);
+	ActiveMatchResponseDto newMatchDto = gameService
+		.createMatch(player);
 
-		return ResponseEntity
-				.status(HttpStatus.CREATED)
-				.body(newMatchDto);
-	};
+	return ResponseEntity
+		.status(HttpStatus.CREATED)
+		.body(newMatchDto);
+    };
 
-	@PostMapping("/{matchId}/join")
-	public ResponseEntity<ActiveMatchResponseDto> joinGame(
-			@RequestParam Long userId,
-			@PathVariable Long matchId) {
-		User player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
+    @PostMapping("/{matchId}/join")
+    public ResponseEntity<ActiveMatchResponseDto> joinGame(
+	    @RequestParam Long userId,
+	    @PathVariable Long matchId) {
+	Player player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
 
-		ActiveMatchResponseDto matchWithPlayersJoined = gameService
-				.joinMatch(matchId, player);
+	ActiveMatchResponseDto matchWithPlayersJoined = gameService
+		.joinMatch(matchId, player);
 
-		return ResponseEntity.ok(matchWithPlayersJoined);
-	};
+	return ResponseEntity.ok(matchWithPlayersJoined);
+    };
 
-	@GetMapping("/available")
-	public ResponseEntity<List<AvailableMatchResponseDto>> getMathcesWaitingForSecondPlayer() {
-		List<AvailableMatchResponseDto> availableMatches = gameService
-				.findAvailableMatches();
+    @GetMapping("/available")
+    public ResponseEntity<List<AvailableMatchResponseDto>> getMathcesWaitingForSecondPlayer() {
+	logger.info("Getting available matches");
+	UserAuthenticator.checkUserRoles();
+	System.out.println("Getting available matches");
+	List<AvailableMatchResponseDto> availableMatches = gameService
+		.findAvailableMatches();
 
-		return ResponseEntity
-				.ok(availableMatches);
-	};
+	return ResponseEntity
+		.ok(availableMatches);
+    };
 
-	@GetMapping("/{matchId}")
-	public ResponseEntity<Match> getMatchDetails(@PathVariable Long matchId) {
-		Match match = gameService.getMatchById(matchId).orElseThrow(() -> new RuntimeException("Match not found!"));
+    @GetMapping("/{matchId}")
+    public ResponseEntity<Match> getMatchDetails(@PathVariable Long matchId) {
+	Match match = gameService.getMatchById(matchId).orElseThrow(() -> new RuntimeException("Match not found!"));
 
-		return ResponseEntity.ok(match);
-	};
+	return ResponseEntity.ok(match);
+    };
 
-	@PostMapping("/{matchId}/place-ships")
-	public ResponseEntity<Match> placeShips(@PathVariable Long matchId,
-			@RequestParam Long userId,
-			@RequestBody Map<String, List<Ship>> payload) {
-		List<Ship> ships = payload
-				.get("ships");
+    @PostMapping("/{matchId}/place-ships")
+    public ResponseEntity<Match> placeShips(@PathVariable Long matchId,
+	    @RequestParam Long userId,
+	    @RequestBody Map<String, List<Ship>> payload) {
+	List<Ship> ships = payload
+		.get("ships");
 
-		Match updatedMatchWithShips = gameService
-				.placeShips(matchId, userId, ships);
-		// return ResponseEntity.ok(updatedMatchWithShips);
+	Match updatedMatchWithShips = gameService
+		.placeShips(matchId, userId, ships);
+	// return ResponseEntity.ok(updatedMatchWithShips);
 
-		return ResponseEntity
-				.ok(updatedMatchWithShips);
-	};
+	return ResponseEntity
+		.ok(updatedMatchWithShips);
+    };
 
-	@PostMapping("/{matchId}/make-move")
-	public ResponseEntity<Move> makeMove(@PathVariable Long matchId,
-			@RequestParam Long userId,
-			@RequestBody Move move) {
-		Move resultMove = gameService
-				.makeMove(matchId, userId, move);
+    @PostMapping("/{matchId}/make-move")
+    public ResponseEntity<Move> makeMove(@PathVariable Long matchId,
+	    @RequestParam Long userId,
+	    @RequestBody Move move) {
+	Move resultMove = gameService
+		.makeMove(matchId, userId, move);
 
-		return ResponseEntity.ok(resultMove);
-	};
-	// Todo. Implement Leave match functionality.
-	// @PostMapping("/{matchId}/leave")
+	return ResponseEntity.ok(resultMove);
+    };
+    // Todo. Implement Leave match functionality.
+    // @PostMapping("/{matchId}/leave")
 }

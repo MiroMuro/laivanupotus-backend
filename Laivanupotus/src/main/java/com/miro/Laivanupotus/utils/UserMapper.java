@@ -8,11 +8,11 @@ import com.miro.Laivanupotus.dto.NotOwnUserProfileDto;
 import com.miro.Laivanupotus.dto.OwnUserProfileDto;
 import com.miro.Laivanupotus.dto.UserDto;
 import com.miro.Laivanupotus.interfaces.UserProfileDto;
-import com.miro.Laivanupotus.model.User;
+import com.miro.Laivanupotus.model.Player;
 
 public class UserMapper {
 
-	public UserDto userToDto(User user) {
+	public UserDto userToDto(Player user) {
 		UserDto userDto = new UserDto(user.getUserName(), user.getEmail());
 		return userDto;
 	}
@@ -26,7 +26,7 @@ public class UserMapper {
 					.getUserName())
 				.build();
 	}
-	public static NotOwnUserProfileDto userToNotOwnUserProfileDto(User user) {
+	public static NotOwnUserProfileDto userToNotOwnUserProfileDto(Player user) {
 		return NotOwnUserProfileDto.builder()
 				.userName(user.getUserName())
 				.totalGames(user.getTotalGames())
@@ -36,7 +36,7 @@ public class UserMapper {
 				.build();
 	};
 
-	public static OwnUserProfileDto userToOwnUserProfileDto(User user) {
+	public static OwnUserProfileDto userToOwnUserProfileDto(Player user) {
 		return OwnUserProfileDto.builder()
 				.id(user
 					.getId())
@@ -50,7 +50,7 @@ public class UserMapper {
 	};
 
 	public static List<NotOwnUserProfileDto> usersToNotOwnUserProfileDto(
-			List<User> users) {
+			List<Player> users) {
 		return users.stream().map((user) -> userToNotOwnUserProfileDto(user))
 			.collect(Collectors.toList());
 	}
