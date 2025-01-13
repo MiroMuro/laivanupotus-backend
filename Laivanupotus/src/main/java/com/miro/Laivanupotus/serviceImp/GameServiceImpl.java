@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.miro.Laivanupotus.Enums.GameStatus;
@@ -13,8 +14,8 @@ import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
-import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.model.Player;
+import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.repository.MatchRepository;
 import com.miro.Laivanupotus.service.GameService;
 import com.miro.Laivanupotus.utils.MatchMapper;
@@ -23,12 +24,15 @@ import com.miro.Laivanupotus.websocket.GameWebSocketHandler;
 @Service
 public class GameServiceImpl implements GameService {
 
+
     private final MatchRepository matchRepository;
+
     private final GameWebSocketHandler webSocketHandler;
 
-    public GameServiceImpl(MatchRepository matchRepository) {
+    @Autowired
+    public GameServiceImpl(MatchRepository matchRepository, GameWebSocketHandler webSocketHandler) {
 	this.matchRepository = matchRepository;
-	this.webSocketHandler = new GameWebSocketHandler();
+	this.webSocketHandler = webSocketHandler;
     }
 
     @Override
