@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import com.miro.Laivanupotus.dto.WebSocketActiveMatchResponseDto;
+
 @Controller
 public class GameWebSocketHandler {
 
@@ -20,7 +22,7 @@ public class GameWebSocketHandler {
 	messagingTemplate.convertAndSend("/topic/game/" + matchId, gameState);
     };
 
-    public void notifyPlayerJoined(Long matchId, String message) {
+    public void notifyPlayerJoined(Long matchId, WebSocketActiveMatchResponseDto message) {
 	messagingTemplate.convertAndSend(
 		"/topic/game/" + matchId + "/player-joined", message);
     };

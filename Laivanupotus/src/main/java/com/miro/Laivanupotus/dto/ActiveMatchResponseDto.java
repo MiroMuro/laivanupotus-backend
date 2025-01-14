@@ -5,29 +5,29 @@ import java.time.LocalDateTime;
 import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.model.Board;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 @Data
-@Builder
+@SuperBuilder
 public class ActiveMatchResponseDto {
 
-	private Long id;
+    private Long id;
 
-	private IngameUserProfileDto player1;
+    private IngameUserProfileDto player1;
 
-	private IngameUserProfileDto player2;
+    private IngameUserProfileDto player2;
 
-	private Board player1Board;
+    private Board player1Board;
 
-	private Board player2Board;
+    private Board player2Board;
 
-	private GameStatus status;
+    private GameStatus status;
 
-	private Long currentTurnPlayerId;
+    private Long currentTurnPlayerId;
 
-	private LocalDateTime startTime;
-	private LocalDateTime updatedAt;
-	private LocalDateTime endedAt;
+    private LocalDateTime startTime;
+    private LocalDateTime updatedAt;
+    private LocalDateTime endedAt;
 
 
 }

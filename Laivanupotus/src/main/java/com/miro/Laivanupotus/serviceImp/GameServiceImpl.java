@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
+import com.miro.Laivanupotus.dto.WebSocketActiveMatchResponseDto;
 import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Match;
@@ -77,8 +78,10 @@ public class GameServiceImpl implements GameService {
 	ActiveMatchResponseDto matchDto = MatchMapper
 		.matchToActiveMatchResponseDto(matchRequiringPlayer2);
 
-	webSocketHandler.notifyPlayerJoined(matchId,
-		"Player" + player.getUserName() + "has joined the game!");
+	//	WebSocketActiveMatchResponseDto message = WebSocketActiveMatchResponseDto.builder()
+	//		.message("User " + player.getUserName() + " has joined the game!").status(true).build();
+	WebSocketActiveMatchResponseDto message = createWebSocketMessage(matchDto, player.getUserName());
+	webSocketHandler.notifyPlayerJoined(matchId, message);
 
 	return matchDto;
     }
@@ -174,6 +177,18 @@ public class GameServiceImpl implements GameService {
 
 	return matchDto;
     }
+
+    private WebSocketActiveMatchResponseDto createWebSocketMessage(ActiveMatchResponseDto matchDto,
+	    String joinedUserName) {
+	WebSocketActiveMatchResponseDto message = WebSocketActiveMatchResponseDto.builder().id(matchDto.getId())
+		.player1(matchDto.getPlayer1()).player2(matchDto.getPlayer2()).player1Board(matchDto.getPlayer1Board())
+		.player2Board(matchDto.getPlayer2Board()).status(matchDto.getStatus())
+		.currentTurnPlayerId(matchDto.getCurrentTurnPlayerId()).startTime(matchDto.getStartTime())
+		.updatedAt(matchDto.getUpdatedAt()).endedAt(matchDto.getEndedAt())
+		.message("User " + joinedUserName + " has joined the game!").messageStatus(true).build();
+
+	return message;
+    };
 
     private void updateBoardState(Board targetBoard, Ship ship) {
 	char[][] board = convertStringToBoard(targetBoard.getBoardState());
