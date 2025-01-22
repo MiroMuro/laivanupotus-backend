@@ -13,6 +13,7 @@ import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.dto.WebSocketActiveMatchResponseDto;
 import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.model.Board;
+import com.miro.Laivanupotus.model.Coordinate;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Player;
@@ -24,7 +25,6 @@ import com.miro.Laivanupotus.websocket.GameWebSocketHandler;
 
 @Service
 public class GameServiceImpl implements GameService {
-
 
     private final MatchRepository matchRepository;
 
@@ -39,11 +39,9 @@ public class GameServiceImpl implements GameService {
     @Override
     public List<AvailableMatchResponseDto> findAvailableMatches() {
 	System.out.println("Finding available matches");
-	List<Match> matches = matchRepository
-		.findByStatus(GameStatus.WAITING_FOR_PLAYER);
+	List<Match> matches = matchRepository.findByStatus(GameStatus.WAITING_FOR_PLAYER);
 
-	List<AvailableMatchResponseDto> matchDtos = MatchMapper
-		.matchesToDto(matches);
+	List<AvailableMatchResponseDto> matchDtos = MatchMapper.matchesToDto(matches);
 
 	;
 
@@ -55,8 +53,7 @@ public class GameServiceImpl implements GameService {
 	Match matchRequiringPlayer2 = matchRepository.findById(matchId)
 		.orElseThrow(() -> new RuntimeException("Match not found!"));
 
-	if (matchRequiringPlayer2
-		.getStatus() != GameStatus.WAITING_FOR_PLAYER) {
+	if (matchRequiringPlayer2.getStatus() != GameStatus.WAITING_FOR_PLAYER) {
 	    throw new RuntimeException("Match is not waiting for a player!");
 	}
 
@@ -64,8 +61,7 @@ public class GameServiceImpl implements GameService {
 	    throw new OwnGameJoinException("You cannot join your own match!");
 	}
 
-	matchRequiringPlayer2
-	.setPlayer2(player);
+	matchRequiringPlayer2.setPlayer2(player);
 	matchRequiringPlayer2.setStatus(GameStatus.PLACING_SHIPS);
 	matchRequiringPlayer2.setUpdatedAt(LocalDateTime.now());
 
@@ -75,11 +71,12 @@ public class GameServiceImpl implements GameService {
 
 	matchRepository.save(matchRequiringPlayer2);
 
-	ActiveMatchResponseDto matchDto = MatchMapper
-		.matchToActiveMatchResponseDto(matchRequiringPlayer2);
+	ActiveMatchResponseDto matchDto = MatchMapper.matchToActiveMatchResponseDto(matchRequiringPlayer2);
 
-	//	WebSocketActiveMatchResponseDto message = WebSocketActiveMatchResponseDto.builder()
-	//		.message("User " + player.getUserName() + " has joined the game!").status(true).build();
+	// WebSocketActiveMatchResponseDto message =
+	// WebSocketActiveMatchResponseDto.builder()
+	// .message("User " + player.getUserName() + " has joined the
+	// game!").status(true).build();
 	WebSocketActiveMatchResponseDto message = createWebSocketMessage(matchDto, player.getUserName());
 	webSocketHandler.notifyPlayerJoined(matchId, message);
 
@@ -104,9 +101,7 @@ public class GameServiceImpl implements GameService {
 	for (Ship ship : ships) {
 	    if (!board.isValidPlacement(ship)) {
 		throw new RuntimeException(
-			"Invalid ship placement! Check your " + ship
-			.getType()
-			.toString() + " placement.");
+			"Invalid ship placement! Check your " + ship.getType().toString() + " placement.");
 	    }
 	    ;
 	    board.getShips().add(ship);
@@ -158,8 +153,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public ActiveMatchResponseDto createMatch(Player player) {
 	Match newMatch = new Match();
-	newMatch
-	.setPlayer1(player);
+	newMatch.setPlayer1(player);
 	newMatch.setStatus(GameStatus.WAITING_FOR_PLAYER);
 	newMatch.setStartTime(LocalDateTime.now());
 	newMatch.setUpdatedAt(LocalDateTime.now());
@@ -169,11 +163,9 @@ public class GameServiceImpl implements GameService {
 	player1Board.setBoardState(".".repeat(100));
 	newMatch.setPlayer1Board(player1Board);
 
-	matchRepository
-	.save(newMatch);
+	matchRepository.save(newMatch);
 
-	ActiveMatchResponseDto matchDto = MatchMapper
-		.matchToActiveMatchResponseDto(newMatch);
+	ActiveMatchResponseDto matchDto = MatchMapper.matchToActiveMatchResponseDto(newMatch);
 
 	return matchDto;
     }
@@ -192,17 +184,12 @@ public class GameServiceImpl implements GameService {
 
     private void updateBoardState(Board targetBoard, Ship ship) {
 	char[][] board = convertStringToBoard(targetBoard.getBoardState());
-	int length = ship.getType().getLength();
+	// int length = ship.getType().getLength();
+	List<Coordinate> shipCoords = ship.getCoordinates();
 
-	for (int i = 0; i < length; i++) {
-	    int x = ship
-		    .getX()
-		    + (ship
-			    .isVertical() ? 0 : i);
-	    int y = ship
-		    .getY()
-		    + (ship
-			    .isVertical() ? i : 0);
+	for (int i = 0; i < shipCoords.size(); i++) {
+	    int x = shipCoords.get(i).getX();
+	    int y = shipCoords.get(i).getY();
 	    board[y][x] = 'S';
 	}
 
@@ -216,35 +203,25 @@ public class GameServiceImpl implements GameService {
 	// S = ship, H = hit, M = miss, . = empty
 	char[][] board = convertStringToBoard(targetBoard.getBoardState());
 
-	if (board[move
-	          .getY()][move
-	                   .getX()] == 'H') {
+	if (board[move.getY()][move.getX()] == 'H') {
 	    return false;
 	}
 	;
 
 	// Check if the shot that hit sunk any ships.
-	if (board[move
-	          .getY()][move
-	                   .getX()] == 'S') {
-	    board[move
-	          .getY()][move
-	                   .getX()] = 'H';
-	    for(Ship ship : targetBoard.getShips()) {
+	if (board[move.getY()][move.getX()] == 'S') {
+	    board[move.getY()][move.getX()] = 'H';
+	    for (Ship ship : targetBoard.getShips()) {
 		ship.setSunk(targetBoard.isShipSunk(ship));
 	    }
-	    targetBoard
-	    .setBoardState(convertBoardToString(board));
+	    targetBoard.setBoardState(convertBoardToString(board));
 	    printBoardToConsole(board);
 	    return true;
 	}
 	;
 
-	board[move
-	      .getY()][move
-	               .getX()] = 'M';
-	targetBoard
-	.setBoardState(convertBoardToString(board));
+	board[move.getY()][move.getX()] = 'M';
+	targetBoard.setBoardState(convertBoardToString(board));
 	printBoardToConsole(board);
 	return false;
     };
@@ -276,8 +253,6 @@ public class GameServiceImpl implements GameService {
 	    }
 	}
 
-
-
 	return board;
     };
 
@@ -302,14 +277,27 @@ public class GameServiceImpl implements GameService {
     private void printBoardToConsole(char[][] board) {
 	for (int i = 0; i < 10; i++) {
 	    for (int j = 0; j < 10; j++) {
-		System.out
-		.print(board[i][j] + " ");
+		System.out.print(board[i][j] + " ");
 	    }
-	    System.out
-	    .println(); // Move to the next line after each row
+	    System.out.println(); // Move to the next line after each row
 	}
     }
 
+    @Override
+    public boolean authorizeMatch(Long matchId, Long playerId) {
+	Optional<Match> match = getMatchById(matchId);
 
+	boolean result = false;
+
+	if (!match.isPresent()) {
+	    return result;
+	}
+
+	if (match.get().getPlayer1().getId().equals(playerId) || match.get().getPlayer2().getId().equals(playerId)) {
+	    result = true;
+	}
+
+	return result;
+    }
 
 }

@@ -22,6 +22,10 @@ public class GameWebSocketHandler {
 	messagingTemplate.convertAndSend("/topic/game/" + matchId, gameState);
     };
 
+    public void notifyShipsPlaced(Long matchId, WebSocketActiveMatchResponseDto message) {
+	messagingTemplate.convertAndSend("/topic/game/" + matchId + "/ships-placed");
+    }
+
     public void notifyPlayerJoined(Long matchId, WebSocketActiveMatchResponseDto message) {
 	messagingTemplate.convertAndSend(
 		"/topic/game/" + matchId + "/player-joined", message);

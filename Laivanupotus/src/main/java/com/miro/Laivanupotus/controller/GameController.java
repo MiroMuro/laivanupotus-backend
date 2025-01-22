@@ -1,7 +1,6 @@
 package com.miro.Laivanupotus.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +18,8 @@ import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
-import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.model.Player;
+import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.service.GameService;
 import com.miro.Laivanupotus.service.UserService;
 import com.miro.Laivanupotus.utils.UserAuthenticator;
@@ -63,6 +62,22 @@ public class GameController {
 	return ResponseEntity.ok(matchWithPlayersJoined);
     };
 
+    @PostMapping("/{matchId}/authorize")
+    public ResponseEntity<String> authorizeGame(@RequestParam Long userId, @PathVariable Long matchId) {
+
+	ResponseEntity<String> responseMessage;
+
+	boolean matchAuthorizationResult = gameService.authorizeMatch(matchId, userId);
+
+	if (!matchAuthorizationResult) {
+	    return responseMessage = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+		    .body("You are not authorized to play this match.");
+	}
+
+	return responseMessage = ResponseEntity.ok("You are authorized to play this match.");
+
+    };
+
     @GetMapping("/available")
     public ResponseEntity<List<AvailableMatchResponseDto>> getMathcesWaitingForSecondPlayer() {
 	logger.info("Getting available matches");
@@ -85,9 +100,11 @@ public class GameController {
     @PostMapping("/{matchId}/place-ships")
     public ResponseEntity<Match> placeShips(@PathVariable Long matchId,
 	    @RequestParam Long userId,
-	    @RequestBody Map<String, List<Ship>> payload) {
-	List<Ship> ships = payload
-		.get("ships");
+	    @RequestBody List<Ship> payload) {
+	List<Ship> ships = payload;
+
+
+	System.out.println("The ships are: " + ships);
 
 	Match updatedMatchWithShips = gameService
 		.placeShips(matchId, userId, ships);

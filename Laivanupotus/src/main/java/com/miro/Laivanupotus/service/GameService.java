@@ -9,20 +9,22 @@ import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
-import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.model.Player;
+import com.miro.Laivanupotus.model.Ship;
 
 @Service
 public interface GameService {
-	List<AvailableMatchResponseDto> findAvailableMatches();
+    List<AvailableMatchResponseDto> findAvailableMatches();
 
-	ActiveMatchResponseDto joinMatch(Long matchId, Player player);
+    ActiveMatchResponseDto joinMatch(Long matchId, Player player);
 
-	Optional<Match> getMatchById(Long matchId);
+    Optional<Match> getMatchById(Long matchId);
 
-	Match placeShips(Long matchId, Long playerId, List<Ship> ships);
+    Match placeShips(Long matchId, Long playerId, List<Ship> ships);
 
-	Move makeMove(Long matchId, Long playerId, Move move);
+    Move makeMove(Long matchId, Long playerId, Move move);
 
-	ActiveMatchResponseDto createMatch(Player player);
+    boolean authorizeMatch(Long matchId, Long playerId);
+
+    ActiveMatchResponseDto createMatch(Player player);
 }
