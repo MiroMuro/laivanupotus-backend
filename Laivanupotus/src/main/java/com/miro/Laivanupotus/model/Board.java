@@ -1,15 +1,16 @@
 package com.miro.Laivanupotus.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
 import lombok.Getter;
@@ -21,102 +22,75 @@ import lombok.Setter;
 @Setter
 public class Board {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<Ship> ships;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "board_id")
+    private List<Ship> ships;
 
-	@ElementCollection
-	private List<Move> moves;
+    @ElementCollection
+    @CollectionTable(name = "board_moves")
+    private List<Move> moves;
 
-	// Stores the board state as a 10x10 grid.
-	// See data types of Ships for more context.
-	@Column(length = 100)
-	private String boardState;
+    // Stores the board state as a 10x10 grid.
+    // See data types of Ships for more context.
+    @Column(length = 100)
+    private String boardState;
 
-	@ElementCollection
-	private List<Coordinate> allShipsCoords;
-	public boolean isValidPlacement(Ship ship) {
-		System.out
-		.println("Ship type: " + ship
-				.getType()
-		.toString());
-		List<Coordinate> shipCoords = getShipsCoordinatesOnBoard(ship);
-		System.out
-		.println("COORDS:" + shipCoords);
-		boolean isOverlappingCoordinates = shipsCoordinatesOverlap(shipCoords);
+    @ElementCollection
+    private List<Coordinate> allShipsCoords;
 
-		if (!isOverlappingCoordinates) {
-			allShipsCoords
-			.addAll(shipCoords);
-			return true;
-		}
+    public boolean isValidPlacement(Ship ship) {
+	System.out.println("Ship type: " + ship.getType().toString());
+	List<Coordinate> shipCoords = ship.getCoordinates();
+	System.out.println("COORDS:" + shipCoords);
+	boolean isOverlappingCoordinates = shipsCoordinatesOverlap(shipCoords);
 
-		return false;
+	if (!isOverlappingCoordinates) {
+	    allShipsCoords.addAll(shipCoords);
+	    return true;
 	}
 
-	public boolean makeAMove(Move move) {
-		// Implementation for making a move
-		return false;
-	}
+	return false;
+    }
 
-	public boolean isShipSunk(Ship ship) {
-		int hits = 0;
-		int length = ship.getType().getLength();
-		boolean isVertical = ship.isVertical();
-		for (int i = 0; i < length; i++) {
-			int x = ship.getX() + (isVertical ? 0 : i);
-			int y = ship.getY() + (isVertical ? i : 0);
+    public boolean makeAMove(Move move) {
+	// Implementation for making a move
+	return false;
+    }
 
-			for (Move move : this.moves) {
-				if (move.getX() == x && move.getY() == y) {
-					hits++;
-					break;
-				}
-				;
-			}
+    public boolean isShipSunk(Ship ship) {
+	int hits = 0;
+	int length = ship.getType().getLength();
+	List<Coordinate> shipCoords = ship.getCoordinates();
+	for (int i = 0; i < shipCoords.size(); i++) {
+	    int x = shipCoords.get(i).getX();
+	    int y = shipCoords.get(i).getY();
+
+	    for (Move move : this.moves) {
+		if (move.getX() == x && move.getY() == y) {
+		    hits++;
+		    break;
 		}
 		;
-		return hits == length;
+	    }
 	}
-	public List<Coordinate> getShipsCoordinatesOnBoard(Ship ship) {
-		int x = ship.getX();
-		int y = ship.getY();
-		boolean isVertical = ship.isVertical();
-		int length = ship.getType().getLength();
+	;
+	return hits == length;
+    }
 
-		ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>();
 
-		if (isVertical) {
-			for (int i = 0; i < length; i++) {
 
-				coordinates
-				.add(new Coordinate(x, y + i));
-			}
+    public boolean shipsCoordinatesOverlap(List<Coordinate> currentShipCoords) {
 
-			return coordinates;
-		}
+	for (Coordinate shipCoords : currentShipCoords) {
+	    if (allShipsCoords.contains(shipCoords)) {
+		return true;
+	    }
+	}
 
-		for (int i = 0; i < length; i++) {
-
-			coordinates
-			.add(new Coordinate(x + i, y));
-		}
-		return coordinates;
-
-	};
-
-	public boolean shipsCoordinatesOverlap(List<Coordinate> currentShipCoords) {
-
-		for (Coordinate shipCoords : currentShipCoords) {
-			if (allShipsCoords
-					.contains(shipCoords)) {
-				return true;
-			}
-		}
-
-		return false;
-	};
+	return false;
+    };
 }

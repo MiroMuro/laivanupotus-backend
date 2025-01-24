@@ -2,10 +2,9 @@ package com.miro.Laivanupotus.model;
 
 import java.util.List;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.Getter;
@@ -18,11 +17,11 @@ import lombok.Setter;
 public class Ship {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private ShipType type;
     @ElementCollection
+    @CollectionTable(name = "ship_coordinates")
     private List<Coordinate> coordinates;
     private String direction;
     private boolean isSunk;

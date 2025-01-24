@@ -101,6 +101,9 @@ public class GameController {
     public ResponseEntity<Match> placeShips(@PathVariable Long matchId,
 	    @RequestParam Long userId,
 	    @RequestBody List<Ship> payload) {
+	System.out.println("In place ships controller method");
+	System.out.println("The payload is: " + payload);
+
 	List<Ship> ships = payload;
 
 

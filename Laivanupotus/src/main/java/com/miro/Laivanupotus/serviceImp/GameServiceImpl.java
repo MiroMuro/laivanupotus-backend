@@ -105,9 +105,10 @@ public class GameServiceImpl implements GameService {
 	    }
 	    ;
 	    board.getShips().add(ship);
+	    System.out.println("");
 	    updateBoardState(board, ship);
 	}
-
+	System.out.println("THe board state is: " + board.getBoardState());
 	// Check if both players have placed their ships
 	if (!match.getPlayer1Board().getShips().isEmpty() && !match.getPlayer2Board().getShips().isEmpty()) {
 	    match.getStatus();

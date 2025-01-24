@@ -12,70 +12,70 @@ import com.miro.Laivanupotus.dto.ErrorResponseDto;
 
 @ControllerAdvice
 public class ApplicationWideExceptionHandler {
-	@ExceptionHandler(UserNotFoundException.class)
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public ResponseEntity<ErrorResponseDto> handleUserNotFoundException(
-			UserNotFoundException ex) {
-		ErrorResponseDto errorResponse = new ErrorResponseDto(ex
-			.getMessage(), "USER_NOT_FOUND",
-			HttpStatus.NOT_FOUND
-			.value(),
-			LocalDateTime
-			.now());
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<ErrorResponseDto> handleUserNotFoundException(
+	    UserNotFoundException ex) {
+	ErrorResponseDto errorResponse = new ErrorResponseDto(ex
+		.getMessage(), "USER_NOT_FOUND",
+		HttpStatus.NOT_FOUND
+		.value(),
+		LocalDateTime
+		.now());
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-	};
+	return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    };
 
-	@ExceptionHandler(InvalidPasswordException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	public ResponseEntity<ErrorResponseDto> handleInvalidPasswordException(
-			InvalidPasswordException ex) {
-		ErrorResponseDto errorResponse = new ErrorResponseDto(ex
-			.getMessage(), "USER_NOT_FOUND",
-			HttpStatus.UNAUTHORIZED
-			.value(),
-			LocalDateTime
-			.now());
-		return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-	};
+    @ExceptionHandler(InvalidPasswordException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ErrorResponseDto> handleInvalidPasswordException(
+	    InvalidPasswordException ex) {
+	ErrorResponseDto errorResponse = new ErrorResponseDto(ex
+		.getMessage(), "USER_NOT_FOUND",
+		HttpStatus.UNAUTHORIZED
+		.value(),
+		LocalDateTime
+		.now());
+	return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    };
 
-	@ExceptionHandler(AuthenticationFailedException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	public ResponseEntity<ErrorResponseDto> handleFailedAuthenticationException(
-			AuthenticationFailedException ex) {
-		ErrorResponseDto errorResponse = new ErrorResponseDto(ex
-			.getMessage(), "AUTHENTICATION_FAILED",
-			HttpStatus.UNAUTHORIZED
-			.value(),
-			LocalDateTime
-			.now());
-		return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-	};
+    @ExceptionHandler(AuthenticationFailedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ErrorResponseDto> handleFailedAuthenticationException(
+	    AuthenticationFailedException ex) {
+	ErrorResponseDto errorResponse = new ErrorResponseDto(ex
+		.getMessage(), "AUTHENTICATION_FAILED",
+		HttpStatus.UNAUTHORIZED
+		.value(),
+		LocalDateTime
+		.now());
+	return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    };
 
-	@ExceptionHandler(OwnGameJoinException.class)
-	@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-	public ResponseEntity<ErrorResponseDto> handleOwnGameJoinException(
-			OwnGameJoinException ex) {
-		ErrorResponseDto errorResponse = new ErrorResponseDto(ex.getMessage(),
-				"NOT_ACCEPTABLE", HttpStatus.NOT_ACCEPTABLE.value(),
-				LocalDateTime.now());
-		return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-	};
+    @ExceptionHandler(OwnGameJoinException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ResponseEntity<ErrorResponseDto> handleOwnGameJoinException(
+	    OwnGameJoinException ex) {
+	ErrorResponseDto errorResponse = new ErrorResponseDto(ex.getMessage(),
+		"NOT_ACCEPTABLE", HttpStatus.NOT_ACCEPTABLE.value(),
+		LocalDateTime.now());
+	return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    };
 
-	// Handle unexpected exceptions
-	@ExceptionHandler(Exception.class)
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ResponseEntity<ErrorResponseDto> handleGeneralException(
-			Exception ex) {
-		ErrorResponseDto errorResponse = new ErrorResponseDto(
-			"An unexpected error occurred", "INTERAL_SERVER_ERROR",
-			HttpStatus.INTERNAL_SERVER_ERROR
-			.value(),
-			LocalDateTime
-			.now());
+    // Handle unexpected exceptions
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ErrorResponseDto> handleGeneralException(
+	    Exception ex) {
+	ErrorResponseDto errorResponse = new ErrorResponseDto(
+		"An unexpected error occurred" + ex.getMessage(), "INTERAL_SERVER_ERROR",
+		HttpStatus.INTERNAL_SERVER_ERROR
+		.value(),
+		LocalDateTime
+		.now());
 
-		return new ResponseEntity<>(errorResponse,
-				HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+	return new ResponseEntity<>(errorResponse,
+		HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 }
