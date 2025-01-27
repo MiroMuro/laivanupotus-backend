@@ -27,7 +27,7 @@ public class Board {
     private Long id;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "board_id")
+    @JoinColumn(name = "board_id", referencedColumnName = "id")
     private List<Ship> ships;
 
     @ElementCollection

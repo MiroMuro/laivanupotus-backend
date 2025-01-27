@@ -103,6 +103,7 @@ public class GameServiceImpl implements GameService {
 		throw new RuntimeException(
 			"Invalid ship placement! Check your " + ship.getType().toString() + " placement.");
 	    }
+	    ship.setBoardId(board.getId())
 	    ;
 	    board.getShips().add(ship);
 	    System.out.println("");

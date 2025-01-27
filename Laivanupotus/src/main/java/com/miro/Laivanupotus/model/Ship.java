@@ -3,9 +3,11 @@ package com.miro.Laivanupotus.model;
 import java.util.List;
 
 import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,11 +16,15 @@ import lombok.Setter;
 @Data
 @Getter
 @Setter
+@IdClass(ShipId.class)
 public class Ship {
 
     @Id
     private Long id;
 
+    @Id
+    @Column(name = "board_id")
+    private Long boardId;
     private ShipType type;
     @ElementCollection
     @CollectionTable(name = "ship_coordinates")
