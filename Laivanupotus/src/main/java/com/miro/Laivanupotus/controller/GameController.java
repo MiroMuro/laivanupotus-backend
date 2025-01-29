@@ -26,7 +26,6 @@ import com.miro.Laivanupotus.utils.UserAuthenticator;
 
 import lombok.RequiredArgsConstructor;
 
-
 @RestController
 @RequestMapping("/api/game")
 @RequiredArgsConstructor
@@ -35,29 +34,20 @@ public class GameController {
     private final GameService gameService;
     private final UserService userService;
 
-
-
     @PostMapping("/create")
-    public ResponseEntity<ActiveMatchResponseDto> createGame(
-	    @RequestParam Long userId) {
+    public ResponseEntity<ActiveMatchResponseDto> createGame(@RequestParam Long userId) {
 	Player player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
 
-	ActiveMatchResponseDto newMatchDto = gameService
-		.createMatch(player);
+	ActiveMatchResponseDto newMatchDto = gameService.createMatch(player);
 
-	return ResponseEntity
-		.status(HttpStatus.CREATED)
-		.body(newMatchDto);
+	return ResponseEntity.status(HttpStatus.CREATED).body(newMatchDto);
     };
 
     @PostMapping("/{matchId}/join")
-    public ResponseEntity<ActiveMatchResponseDto> joinGame(
-	    @RequestParam Long userId,
-	    @PathVariable Long matchId) {
+    public ResponseEntity<ActiveMatchResponseDto> joinGame(@RequestParam Long userId, @PathVariable Long matchId) {
 	Player player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
 
-	ActiveMatchResponseDto matchWithPlayersJoined = gameService
-		.joinMatch(matchId, player);
+	ActiveMatchResponseDto matchWithPlayersJoined = gameService.joinMatch(matchId, player);
 
 	return ResponseEntity.ok(matchWithPlayersJoined);
     };
@@ -83,11 +73,9 @@ public class GameController {
 	logger.info("Getting available matches");
 	UserAuthenticator.checkUserRoles();
 	System.out.println("Getting available matches");
-	List<AvailableMatchResponseDto> availableMatches = gameService
-		.findAvailableMatches();
+	List<AvailableMatchResponseDto> availableMatches = gameService.findAvailableMatches();
 
-	return ResponseEntity
-		.ok(availableMatches);
+	return ResponseEntity.ok(availableMatches);
     };
 
     @GetMapping("/{matchId}")
@@ -98,31 +86,25 @@ public class GameController {
     };
 
     @PostMapping("/{matchId}/place-ships")
-    public ResponseEntity<Match> placeShips(@PathVariable Long matchId,
-	    @RequestParam Long userId,
+    public ResponseEntity<Match> placeShips(@PathVariable Long matchId, @RequestParam Long userId,
 	    @RequestBody List<Ship> payload) {
 	System.out.println("In place ships controller method");
 	System.out.println("The payload is: " + payload);
 
 	List<Ship> ships = payload;
 
-
 	System.out.println("The ships are: " + ships);
 
-	Match updatedMatchWithShips = gameService
-		.placeShips(matchId, userId, ships);
+	Match updatedMatchWithShips = gameService.placeShips(matchId, userId, ships);
 	// return ResponseEntity.ok(updatedMatchWithShips);
 
-	return ResponseEntity
-		.ok(updatedMatchWithShips);
+	return ResponseEntity.ok(updatedMatchWithShips);
     };
 
     @PostMapping("/{matchId}/make-move")
-    public ResponseEntity<Move> makeMove(@PathVariable Long matchId,
-	    @RequestParam Long userId,
+    public ResponseEntity<Move> makeMove(@PathVariable Long matchId, @RequestParam Long userId,
 	    @RequestBody Move move) {
-	Move resultMove = gameService
-		.makeMove(matchId, userId, move);
+	Move resultMove = gameService.makeMove(matchId, userId, move);
 
 	return ResponseEntity.ok(resultMove);
     };

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
+import com.miro.Laivanupotus.dto.IngameUserProfileDto;
 import com.miro.Laivanupotus.dto.WebSocketActiveMatchResponseDto;
+import com.miro.Laivanupotus.dto.WebSocketGameStatusUpdateResponseDto;
 import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Coordinate;
@@ -21,6 +23,7 @@ import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.repository.MatchRepository;
 import com.miro.Laivanupotus.service.GameService;
 import com.miro.Laivanupotus.utils.MatchMapper;
+import com.miro.Laivanupotus.utils.UserMapper;
 import com.miro.Laivanupotus.websocket.GameWebSocketHandler;
 
 @Service
@@ -73,10 +76,7 @@ public class GameServiceImpl implements GameService {
 
 	ActiveMatchResponseDto matchDto = MatchMapper.matchToActiveMatchResponseDto(matchRequiringPlayer2);
 
-	// WebSocketActiveMatchResponseDto message =
-	// WebSocketActiveMatchResponseDto.builder()
-	// .message("User " + player.getUserName() + " has joined the
-	// game!").status(true).build();
+
 	WebSocketActiveMatchResponseDto message = createWebSocketMessage(matchDto, player.getUserName());
 	webSocketHandler.notifyPlayerJoined(matchId, message);
 
@@ -96,29 +96,69 @@ public class GameServiceImpl implements GameService {
 	    throw new RuntimeException("Match is not in the placing ships phase!");
 	}
 
-	Board board = playerId.equals(match.getPlayer1().getId()) ? match.getPlayer1Board() : match.getPlayer2Board();
+	Board boardToPlaceShipsOn = playerId.equals(match.getPlayer1().getId()) ? match.getPlayer1Board()
+		: match.getPlayer2Board();
 
+	confirmValidShipPlacement(boardToPlaceShipsOn, ships);
+
+	beginGameIfBothPlayersPlacedShips(match);
+
+	return matchRepository.save(match);
+    }
+
+    public void confirmValidShipPlacement(Board board, List<Ship> ships) {
 	for (Ship ship : ships) {
 	    if (!board.isValidPlacement(ship)) {
 		throw new RuntimeException(
 			"Invalid ship placement! Check your " + ship.getType().toString() + " placement.");
 	    }
-	    ship.setBoardId(board.getId())
-	    ;
+	    ship.setBoardId(board.getId());
 	    board.getShips().add(ship);
-	    System.out.println("");
 	    updateBoardState(board, ship);
 	}
-	System.out.println("THe board state is: " + board.getBoardState());
-	// Check if both players have placed their ships
-	if (!match.getPlayer1Board().getShips().isEmpty() && !match.getPlayer2Board().getShips().isEmpty()) {
-	    match.getStatus();
-	    match.setStatus(GameStatus.IN_PROGRESS);
-	    match.setCurrentTurnPlayerId(match.getPlayer1().getId());
-	}
-	return matchRepository.save(match);
     }
 
+    private void updateBoardState(Board targetBoard, Ship ship) {
+	char[][] board = convertStringToBoard(targetBoard.getBoardState());
+	// int length = ship.getType().getLength();
+	List<Coordinate> shipCoords = ship.getCoordinates();
+
+	for (int i = 0; i < shipCoords.size(); i++) {
+	    int x = shipCoords.get(i).getX();
+	    int y = shipCoords.get(i).getY();
+	    board[y][x] = 'S';
+	}
+
+	printBoardToConsole(board);
+
+	targetBoard.setBoardState(convertBoardToString(board));
+    };
+
+    private void beginGameIfBothPlayersPlacedShips(Match match) {
+	if (!match.getPlayer1Board().getShips().isEmpty() && !match.getPlayer2Board().getShips().isEmpty()) {
+
+	    Match startedMatch = startMatch(match);
+
+	    WebSocketGameStatusUpdateResponseDto gameBeginsMessage = createMatchStartOrEndWebsocketMessage(
+		    startedMatch);
+	    webSocketHandler.notifyGameUpdate(startedMatch.getId(), gameBeginsMessage);
+	}
+    };
+
+    private Match startMatch(Match match) {
+	match.getStatus();
+	match.setStatus(GameStatus.IN_PROGRESS);
+	match.setCurrentTurnPlayerId(match.getPlayer1().getId());
+	return match;
+    }
+
+    private WebSocketGameStatusUpdateResponseDto createMatchStartOrEndWebsocketMessage(Match match) {
+	IngameUserProfileDto player1 = (IngameUserProfileDto) UserMapper.userToIngameUserProfileDto(match.getPlayer1());
+	WebSocketGameStatusUpdateResponseDto gameBeginsMessage = WebSocketGameStatusUpdateResponseDto.builder()
+		.player(player1).status(match.getStatus()).build();
+
+	return gameBeginsMessage;
+    }
     // playerId is the player who made the move.
     @Override
     public Move makeMove(Long matchId, Long playerId, Move move) {
@@ -184,21 +224,7 @@ public class GameServiceImpl implements GameService {
 	return message;
     };
 
-    private void updateBoardState(Board targetBoard, Ship ship) {
-	char[][] board = convertStringToBoard(targetBoard.getBoardState());
-	// int length = ship.getType().getLength();
-	List<Coordinate> shipCoords = ship.getCoordinates();
 
-	for (int i = 0; i < shipCoords.size(); i++) {
-	    int x = shipCoords.get(i).getX();
-	    int y = shipCoords.get(i).getY();
-	    board[y][x] = 'S';
-	}
-
-	printBoardToConsole(board);
-
-	targetBoard.setBoardState(convertBoardToString(board));
-    };
 
     private boolean isHit(Board targetBoard, Move move) {
 
