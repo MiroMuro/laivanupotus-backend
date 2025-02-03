@@ -32,6 +32,7 @@ public class GameWebSocketHandler {
     };
 
     public void notifyMoveMade(Long matchId, Object moveResult) {
+	System.out.println("The move result is: " + moveResult);
 	messagingTemplate.convertAndSend("/topic/game/" + matchId + "/move",
 		moveResult);
     }

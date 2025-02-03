@@ -105,7 +105,7 @@ public class GameController {
     public ResponseEntity<Move> makeMove(@PathVariable Long matchId, @RequestParam Long userId,
 	    @RequestBody Move move) {
 	Move resultMove = gameService.makeMove(matchId, userId, move);
-
+	System.out.println("The result move is: " + resultMove);
 	return ResponseEntity.ok(resultMove);
     };
     // Todo. Implement Leave match functionality.

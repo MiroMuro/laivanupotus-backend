@@ -182,6 +182,8 @@ public class GameServiceImpl implements GameService {
 	move.setHit(isHit);
 	move.setPlayerBehindTheMoveId(playerId);
 
+	System.out.println("THe move" + move.toString());
+
 	updateMatchState(match, boardToTarget, playerId);
 
 	matchRepository.save(match);
