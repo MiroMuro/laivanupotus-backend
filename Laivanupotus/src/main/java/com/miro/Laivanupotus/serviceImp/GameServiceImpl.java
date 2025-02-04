@@ -229,7 +229,7 @@ public class GameServiceImpl implements GameService {
 
 
     private boolean isHit(Board targetBoard, Move move) {
-
+	// targetBoard.getMoves().add(move);
 	// S = ship, H = hit, M = miss, . = empty
 	char[][] board = convertStringToBoard(targetBoard.getBoardState());
 
@@ -260,9 +260,7 @@ public class GameServiceImpl implements GameService {
     private void updateMatchState(Match match, Board targetBoard, Long userId) {
 	// Check if game is over
 	if (isGameOver(targetBoard)) {
-	    match.setEndedAt(LocalDateTime.now());
-	    match.setUpdatedAt(LocalDateTime.now());
-	    match.setStatus(GameStatus.FINISHED);
+	    endMatch(match);
 	    return;
 	}
 	;
@@ -272,6 +270,14 @@ public class GameServiceImpl implements GameService {
 
 	match.setUpdatedAt(LocalDateTime.now());
 
+    };
+
+    private void endMatch(Match match) {
+	match.setEndedAt(LocalDateTime.now());
+	match.setUpdatedAt(LocalDateTime.now());
+	match.setStatus(GameStatus.FINISHED);
+	WebSocketGameStatusUpdateResponseDto gameEndedMessage = createMatchStartOrEndWebsocketMessage(match);
+	webSocketHandler.notifyGameUpdate(match.getId(), gameEndedMessage);
     };
 
     private char[][] convertStringToBoard(String boardState) {

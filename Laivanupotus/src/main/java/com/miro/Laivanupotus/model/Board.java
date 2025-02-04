@@ -56,15 +56,16 @@ public class Board {
 	return false;
     }
 
-    public boolean makeAMove(Move move) {
-	// Implementation for making a move
-	return false;
-    }
+
 
     public boolean isShipSunk(Ship ship) {
+    	System.out.println("THe ship in question: " + ship);
 	int hits = 0;
 	int length = ship.getType().getLength();
+	System.out.println("Ship length: " + length);
 	List<Coordinate> shipCoords = ship.getCoordinates();
+	System.out.println("Ship coords: " + shipCoords);
+	System.out.println("Moves: " + this.moves);
 	for (int i = 0; i < shipCoords.size(); i++) {
 	    int x = shipCoords.get(i).getX();
 	    int y = shipCoords.get(i).getY();
@@ -72,11 +73,16 @@ public class Board {
 	    for (Move move : this.moves) {
 		if (move.getX() == x && move.getY() == y) {
 		    hits++;
+		    System.out.println("HIT!");
 		    break;
 		}
 		;
 	    }
 	}
+	System.out.println("Hits: " + hits);
+	System.out.println("Length: " + length);
+	Boolean sunk = hits == length;
+	System.out.println("Sunk: " + sunk);
 	;
 	return hits == length;
     }

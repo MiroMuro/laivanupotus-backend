@@ -2,6 +2,9 @@ package com.miro.Laivanupotus.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.miro.Laivanupotus.utils.ShipTypeDeserializer;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -25,6 +28,7 @@ public class Ship {
     @Id
     @Column(name = "board_id")
     private Long boardId;
+    @JsonDeserialize(using = ShipTypeDeserializer.class)
     private ShipType type;
     @ElementCollection
     @CollectionTable(name = "ship_coordinates")
@@ -35,7 +39,7 @@ public class Ship {
     private int width;
 
     public enum ShipType {
-	CARRIER(5), BATTLESHIP(4), CRUISER(3), SUBMARINE(3), DESTROYER(2), WARBOAT(1);
+	CARRIER(5), BATTLESHIP(4), CRUISER(3), DESTROYER(2), WARBOAT(1);
 
 	private final int length;
 

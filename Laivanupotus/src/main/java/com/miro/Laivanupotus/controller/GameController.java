@@ -74,7 +74,6 @@ public class GameController {
 	UserAuthenticator.checkUserRoles();
 	System.out.println("Getting available matches");
 	List<AvailableMatchResponseDto> availableMatches = gameService.findAvailableMatches();
-
 	return ResponseEntity.ok(availableMatches);
     };
 
