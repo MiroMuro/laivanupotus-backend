@@ -59,13 +59,13 @@ public class Board {
 
 
     public boolean isShipSunk(Ship ship) {
-    	System.out.println("THe ship in question: " + ship);
+    System.out.println("In board class THe ship in question: " + ship);
 	int hits = 0;
 	int length = ship.getType().getLength();
-	System.out.println("Ship length: " + length);
+	//System.out.println("Ship length: " + length);
 	List<Coordinate> shipCoords = ship.getCoordinates();
-	System.out.println("Ship coords: " + shipCoords);
-	System.out.println("Moves: " + this.moves);
+	//System.out.println("Ship coords: " + shipCoords);
+	//System.out.println("Moves: " + this.moves);
 	for (int i = 0; i < shipCoords.size(); i++) {
 	    int x = shipCoords.get(i).getX();
 	    int y = shipCoords.get(i).getY();
@@ -79,10 +79,10 @@ public class Board {
 		;
 	    }
 	}
-	System.out.println("Hits: " + hits);
-	System.out.println("Length: " + length);
+	System.out.println("in board class pHits: " + hits);
+	System.out.println("in board class Length: " + length);
 	Boolean sunk = hits == length;
-	System.out.println("Sunk: " + sunk);
+	System.out.println("in board class Sunk: " + sunk);
 	;
 	return hits == length;
     }

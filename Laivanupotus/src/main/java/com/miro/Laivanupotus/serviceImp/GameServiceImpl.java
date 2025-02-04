@@ -13,6 +13,7 @@ import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.dto.IngameUserProfileDto;
 import com.miro.Laivanupotus.dto.WebSocketActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.WebSocketGameStatusUpdateResponseDto;
+import com.miro.Laivanupotus.dto.WebSocketMoveResponseDto;
 import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Coordinate;
@@ -159,6 +160,7 @@ public class GameServiceImpl implements GameService {
 
 	return gameBeginsMessage;
     }
+    
     // playerId is the player who made the move.
     @Override
     public Move makeMove(Long matchId, Long playerId, Move move) {
@@ -172,29 +174,61 @@ public class GameServiceImpl implements GameService {
 	    throw new RuntimeException("It's not your turn!");
 
 	}
-
+	
 	// Determine which board to target
 	Board boardToTarget = playerId.equals(match.getPlayer1().getId()) ? match.getPlayer2Board()
 		: match.getPlayer1Board();
-
+	
+	if(hasCoordinateAlreadyBeenHit(boardToTarget, move)) {
+		throw new RuntimeException("You have already made a move on this coordinate!");
+	}
+	
 	boardToTarget.getMoves().add(move);
+	
 	Boolean isHit = isHit(boardToTarget, move);
 	move.setHit(isHit);
 	move.setPlayerBehindTheMoveId(playerId);
-
-	System.out.println("THe move" + move.toString());
-
+	
+	String moveResponseMessage = getMoveResponseMessage(move, boardToTarget);
+	
+	WebSocketMoveResponseDto message = WebSocketMoveResponseDto.builder().move(move).message(moveResponseMessage).build();
+	
 	updateMatchState(match, boardToTarget, playerId);
-
+	
 	matchRepository.save(match);
-
-	webSocketHandler.notifyMoveMade(matchId, move);
+	
+	
+	webSocketHandler.notifyMoveMade(matchId, message);
 
 	return move;
 
     }
 
-    @Override
+    private String getMoveResponseMessage(Move move, Board boardToTarget) {
+    	Boolean isHit = move.isHit();
+    	if (isHit) {
+    		getShipHitMessage(move, boardToTarget);
+    	}
+    	return "You missed!";
+		
+	}
+    
+    private String getShipHitMessage(Move move, Board boardToTarget) {
+    	Ship hitShip = getShipFromMove(move, boardToTarget);
+		Boolean isShipSunk = boardToTarget.isShipSunk(hitShip);
+		
+		if (isShipSunk) {
+			hitShip.setSunk(true);
+			return "Great shot! You sunk the enemy's " + hitShip.getType().toString() + "!";
+		} else {
+			return "Nice shot! You hit the the enemy!";
+		}
+    }
+    
+    
+    
+
+	@Override
     public ActiveMatchResponseDto createMatch(Player player) {
 	Match newMatch = new Match();
 	newMatch.setPlayer1(player);
@@ -233,28 +267,47 @@ public class GameServiceImpl implements GameService {
 	// S = ship, H = hit, M = miss, . = empty
 	char[][] board = convertStringToBoard(targetBoard.getBoardState());
 
-	if (board[move.getY()][move.getX()] == 'H') {
-	    return false;
-	}
-	;
+	Boolean isHit = false;
 
-	// Check if the shot that hit sunk any ships.
+	
 	if (board[move.getY()][move.getX()] == 'S') {
 	    board[move.getY()][move.getX()] = 'H';
-	    for (Ship ship : targetBoard.getShips()) {
-		ship.setSunk(targetBoard.isShipSunk(ship));
-	    }
-	    targetBoard.setBoardState(convertBoardToString(board));
-	    printBoardToConsole(board);
-	    return true;
+//	    for (Ship ship : targetBoard.getShips()) {
+//		ship.setSunk(targetBoard.isShipSunk(ship));
+//	    }
+	    
+	    isHit = true;
+	    
+	} else {
+		board[move.getY()][move.getX()] = 'M';
 	}
-	;
-
-	board[move.getY()][move.getX()] = 'M';
+	
 	targetBoard.setBoardState(convertBoardToString(board));
 	printBoardToConsole(board);
-	return false;
+	return isHit;
     };
+    
+    
+    private Ship getShipFromMove(Move move, Board targetBoard) {
+		Coordinate moveCoord = new Coordinate(move.getX(), move.getY());
+		Ship hitShip = targetBoard.getShips().stream().filter(ship -> ship.getCoordinates().contains(moveCoord))
+				.findFirst().orElse(null);
+		return hitShip;
+    }
+    
+    private Boolean hasCoordinateAlreadyBeenHit (Board targetBoard, Move move) {
+    	char[][] board = convertStringToBoard(targetBoard.getBoardState());
+    	if (board[move.getY()][move.getX()] == 'H') {
+    	    return true;
+    	};
+    	
+    	return false;
+    };
+    
+ 
+    
+  
+    
 
     // The userId here is the player who made the last move.
     private void updateMatchState(Match match, Board targetBoard, Long userId) {
