@@ -35,5 +35,12 @@ public class GameWebSocketHandler {
 	System.out.println("The move result is: " + moveResult);
 	messagingTemplate.convertAndSend("/topic/game/" + matchId + "/move",
 		moveResult);
-    }
+    };
+    
+    public void notifyOpponentDisconnect(Long matchId) {
+    	System.out.println("Opponent disconnected");
+    	messagingTemplate.convertAndSend(
+    			"/topic/game/" + matchId + "/opponent-disconnected","Opponent disconnected");
+    	    };
+    
 }

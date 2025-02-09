@@ -207,7 +207,7 @@ public class GameServiceImpl implements GameService {
     private String getMoveResponseMessage(Move move, Board boardToTarget) {
     	Boolean isHit = move.isHit();
     	if (isHit) {
-    		getShipHitMessage(move, boardToTarget);
+    		return getShipHitMessage(move, boardToTarget);
     	}
     	return "You missed!";
 		
@@ -375,7 +375,10 @@ public class GameServiceImpl implements GameService {
     @Override
     public boolean authorizeMatch(Long matchId, Long playerId) {
 	Optional<Match> match = getMatchById(matchId);
-
+	
+	System.out.println("The match is: " + match);
+	System.out.println("The player id is: " + playerId);
+	System.out.println("The match id is: " + matchId);
 	boolean result = false;
 
 	if (!match.isPresent()) {
