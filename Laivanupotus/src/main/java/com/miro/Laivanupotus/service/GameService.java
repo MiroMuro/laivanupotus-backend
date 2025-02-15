@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.model.Match;
@@ -27,4 +28,6 @@ public interface GameService {
     boolean authorizeMatch(Long matchId, Long playerId);
 
     ActiveMatchResponseDto createMatch(Player player);
+    
+    ActiveMatchResponseDto getActiveMatch(Long matchId, Long playerId, GameStatus gameStatus);
 }

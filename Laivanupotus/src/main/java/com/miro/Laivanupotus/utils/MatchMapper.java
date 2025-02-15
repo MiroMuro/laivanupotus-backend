@@ -14,6 +14,7 @@ public class MatchMapper {
 				.map((match) -> matchToDto(match))
 				.collect(Collectors.toList());
 	};
+	
 	public static AvailableMatchResponseDto matchToDto(Match match) {
 		String player2UserName = match.getPlayer2() != null
 				? match.getPlayer2()

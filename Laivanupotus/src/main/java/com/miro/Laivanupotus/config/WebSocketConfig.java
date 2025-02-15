@@ -25,9 +25,12 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.miro.Laivanupotus.dto.DisconnectMessage;
 import com.miro.Laivanupotus.model.Player;
 import com.miro.Laivanupotus.service.CustomUserDetailsService;
 import com.miro.Laivanupotus.service.TokenService;
+import com.miro.Laivanupotus.websocket.GameWebSocketHandler;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -39,7 +42,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
-
+//    
+//    @Autowired
+//    private  GameWebSocketHandler webSocketHandler;
     @Bean
     AuthorizationManager<Message<?>> authorizationManager(
 	    MessageMatcherDelegatingAuthorizationManager.Builder messages) {
@@ -102,7 +107,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	    @Override
 	    public Message<?> preSend(Message<?> message, MessageChannel channel) {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
+		
 
 		if (StompCommand.CONNECT.equals(accessor.getCommand())) {
 		    List<String> authorization = accessor.getNativeHeader("Authorization");
@@ -135,12 +140,59 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 			;
 		    }
 		}
+		
+			if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+				handleStompDisconnect(accessor);			
+			}
+			
+			if (StompCommand.SEND.equals(accessor.getCommand())) {
+				System.out.println("The message is: " + message.getPayload());
+				System.out.println("Sending message to: " + accessor.getDestination());
+				handleIntentionalDisconnection(accessor, message);
+			}	
 
 		return message;
 	    }
 	};
     }
-
+    
+    private void handleStompDisconnect(StompHeaderAccessor accessor) {
+    	//Abrupt disconnect
+    	CustomPrincipal principal = (CustomPrincipal) accessor.getUser();
+    	if(principal == null) return;
+    	
+    	System.out.println("Disconnecting user: " + principal.getName());
+    	//Todo: Implement logic to remove player from game. And to save game state.
+    	//And to notify the other player. XD
+    };
+    
+    
+    private void handleIntentionalDisconnection(StompHeaderAccessor accessor, Message<?> msg) {
+    	CustomPrincipal principal = (CustomPrincipal) accessor.getUser();
+    	if(principal == null) return;
+    	
+    	String payload = new String((byte[]) msg.getPayload());
+    	
+    	try {
+    		ObjectMapper mapper = new ObjectMapper();
+    		DisconnectMessage disconnectMessage = mapper.readValue(payload, DisconnectMessage.class);
+    		
+    		switch(disconnectMessage.getType()) {
+    			case "NAVIGATION":
+    				System.out.println("User "+principal.getName()+" navigated away from the page."+disconnectMessage.getPath()+". The message is: "+disconnectMessage.getMessage());
+    				break;
+    			case "REFRESH":
+					System.out.println("User " + principal.getName() + " refreshed the page. The message is: "
+							+ disconnectMessage.getMessage());
+					break;
+    			case "LEAVE":
+    				System.out.println("User " + principal.getName() + " left the game. The message is: "+disconnectMessage.getMessage());
+    				break;
+    		}
+    	} catch (Exception e) {
+    		System.err.println("Error parsing disconnect message: " + e.getMessage());
+    	};
+    };
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
 	registry.enableSimpleBroker("/topic", "/queue");

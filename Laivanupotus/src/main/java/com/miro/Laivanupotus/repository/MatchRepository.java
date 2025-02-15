@@ -13,7 +13,9 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
 	List<Match> findByStatus(
 			com.miro.Laivanupotus.Enums.GameStatus waitingForPlayer);
-
+	
+	Optional<Match> findByIdAndStatus(Long matchId, com.miro.Laivanupotus.Enums.GameStatus gameStatus);
+	
 	@Override
 	Optional<Match> findById(Long matchId);
 

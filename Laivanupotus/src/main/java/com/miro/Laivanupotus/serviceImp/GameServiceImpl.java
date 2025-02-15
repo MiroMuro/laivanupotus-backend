@@ -392,4 +392,12 @@ public class GameServiceImpl implements GameService {
 	return result;
     }
 
+	@Override
+	public ActiveMatchResponseDto getActiveMatch(Long matchId, Long playerId, GameStatus status) {
+		//Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found!"));
+		Match match = matchRepository.findByIdAndStatus(matchId, status).orElseThrow(()-> new RuntimeException("Match not found!"));
+		ActiveMatchResponseDto matchDto = MatchMapper.matchToActiveMatchResponseDto(match);
+		return matchDto;
+	}
+
 }
