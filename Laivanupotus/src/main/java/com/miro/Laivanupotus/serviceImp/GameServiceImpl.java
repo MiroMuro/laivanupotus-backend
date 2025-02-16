@@ -17,6 +17,7 @@ import com.miro.Laivanupotus.dto.WebSocketMoveResponseDto;
 import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Coordinate;
+import com.miro.Laivanupotus.model.PlayerConnectionMessage;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Player;
@@ -399,5 +400,12 @@ public class GameServiceImpl implements GameService {
 		ActiveMatchResponseDto matchDto = MatchMapper.matchToActiveMatchResponseDto(match);
 		return matchDto;
 	}
+	
+	@Override
+	public void disconnectPlayer(PlayerConnectionMessage disconnectMessage, Long matchId) {
+		webSocketHandler.notifyOpponentDisconnect(matchId, disconnectMessage);
+	};
+	
+	
 
 }

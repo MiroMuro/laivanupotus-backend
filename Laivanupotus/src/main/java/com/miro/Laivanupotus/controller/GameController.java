@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
-import com.miro.Laivanupotus.dto.DisconnectMessage;
+import com.miro.Laivanupotus.model.PlayerConnectionMessage;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Player;
@@ -122,9 +122,10 @@ public class GameController {
 	};
 
 	@PostMapping("/{matchId}/leave")
-	public ResponseEntity<String> leaveMatch(@RequestBody DisconnectMessage disconnectMessage, @PathVariable Long matchId) {
+	public ResponseEntity<String> leaveMatch(@RequestBody PlayerConnectionMessage disconnectMessage, @PathVariable Long matchId) {
 		System.out.println("Leaving match");
 		System.out.println("The message is: " + disconnectMessage.toString());
+		gameService.disconnectPlayer(disconnectMessage, matchId);
 		return ResponseEntity.ok("");
 	};
 	// Todo. Implement Leave match functionality.

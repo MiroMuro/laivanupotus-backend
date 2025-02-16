@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
+import com.miro.Laivanupotus.model.PlayerConnectionMessage;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
 import com.miro.Laivanupotus.model.Player;
@@ -30,4 +31,6 @@ public interface GameService {
     ActiveMatchResponseDto createMatch(Player player);
     
     ActiveMatchResponseDto getActiveMatch(Long matchId, Long playerId, GameStatus gameStatus);
+    
+    void  disconnectPlayer(PlayerConnectionMessage disconnectMessage, Long matchId);
 }

@@ -5,6 +5,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.miro.Laivanupotus.dto.WebSocketActiveMatchResponseDto;
+import com.miro.Laivanupotus.model.PlayerConnectionMessage;
 
 @Controller
 public class GameWebSocketHandler {
@@ -37,10 +38,13 @@ public class GameWebSocketHandler {
 		moveResult);
     };
     
-    public void notifyOpponentDisconnect(Long matchId) {
+    public void notifyOpponentDisconnect(Long matchId, PlayerConnectionMessage message) {
     	System.out.println("Opponent disconnected");
     	messagingTemplate.convertAndSend(
-    			"/topic/game/" + matchId + "/opponent-disconnected","Opponent disconnected");
+    			"/topic/game/" + matchId + "/opponent-disconnected", message);
     	    };
-    
+    public void notifyOpponentConnect(PlayerConnectionMessage message, Long matchId) {
+    	System.out.println("Opponent connected");
+    	messagingTemplate.convertAndSend("/topic/game/" + matchId + "/opponent-connected",message);
+    };
 }
