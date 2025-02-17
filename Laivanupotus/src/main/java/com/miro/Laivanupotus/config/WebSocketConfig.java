@@ -34,6 +34,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.miro.Laivanupotus.model.PlayerConnectionMessage;
 import com.miro.Laivanupotus.model.Player;
+import com.miro.Laivanupotus.service.ConnectionEventService;
 import com.miro.Laivanupotus.service.CustomUserDetailsService;
 import com.miro.Laivanupotus.service.TokenService;
 import com.miro.Laivanupotus.serviceImp.GameServiceImpl;
@@ -51,7 +52,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	private CustomUserDetailsService userDetailsService;
 
 	private Map<Player, Long> reconnectingPlayers = new ConcurrentHashMap<>();
-
+	
+	@Autowired
+	private ConnectionEventService connectionEventService;
 //    
 //    @Autowired
 //    private  GameWebSocketHandler webSocketHandler;
@@ -115,148 +118,139 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 		return new ChannelInterceptor() {
 			@Override
 			public Message<?> preSend(Message<?> message, MessageChannel channel) {
+
 				StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+				
+				StompCommand messageStompCommand = accessor.getCommand();
+				
+				if (StompCommand.CONNECT.equals(messageStompCommand)) {
 
-				if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-					List<String> authorization = accessor.getNativeHeader("Authorization");
-
-					if (authorization != null && !authorization.isEmpty()) {
-						String token = authorization.get(0).replace("Bearer ", "");
-
-						if (tokenService.validateToken(token)) {
-							String username = tokenService.getUserNameFromToken(token);
-							UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-							UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-									userDetails, null, userDetails.getAuthorities());
-							accessor.setUser(new CustomPrincipal((Player) auth.getPrincipal()));
-							
-							CustomPrincipal principal = (CustomPrincipal) accessor.getUser();
-							Player user = principal.getPlayer();
-							System.out.println("The user connecting here is:"+user.toString());
-							System.out.println("Reconnectingplayers in connect method"+reconnectingPlayers.toString());
-							if(reconnectingPlayers.containsKey(user)) {
-								System.out.println("User " + principal.getName() + " reconnected to the game.");
-								reconnectingPlayers.remove(user);
-							}
-						}
-
-					}
-				}
-
-				if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-
-					String urlDestination = accessor.getDestination();
-					if (urlDestination != null) {
-						CustomPrincipal principal = (CustomPrincipal) accessor.getUser();
-						if (!isValidBattleShipSubscription(urlDestination, principal)) {
-							throw new MessageDeliveryException(
-									"Invalid subscription destination url!: " + urlDestination);
-						}
-						;
-					}
-				}
-
-				if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
-					CustomPrincipal principal = (CustomPrincipal) accessor.getUser();
-					if (principal != null) {
-						Player user = principal.getPlayer();
-						System.out.println("Disconnecting user: " + user.toString());
-						//handleStompDisconnect(accessor);
-						reconnectingPlayers.put(user, System.currentTimeMillis());
-						System.out.println("Reconnectingplayers in connect method"+reconnectingPlayers.toString());
-						scheduleDisconnectionCheck(user);
-					}
 					
+					List<String> authorizationHeader = validateAuthorizationHeaders(accessor);
+					
+					String AuthtokenFromHeaders = getAuthTokenFromHeaders(authorizationHeader);
+					
+					boolean tokenIsValid = authTokenIsValid(AuthtokenFromHeaders);
+					
+					if (tokenIsValid) {
+						UserDetails userDetailsFromToken = getUserDetailsFromToken(AuthtokenFromHeaders);
+						
+						setUserToAccessor(accessor, userDetailsFromToken);
+						
+						Player user = getPlayerFromAccessor(accessor);
+						
+						reconnectPlayer(user);
+					};
+				
 				}
 
-				if (StompCommand.SEND.equals(accessor.getCommand())) {
+				if (StompCommand.SUBSCRIBE.equals(messageStompCommand)) {
+					
+					String urlDestination = accessor.getDestination();
+					
+					if (isValidUrl(urlDestination)) {
+						return message;
+					}
+
+				}
+
+				if (StompCommand.DISCONNECT.equals(messageStompCommand)) {
+					Player user = getPlayerFromAccessor(accessor);				
+					handlePlayerDisconnect(user);
+
+				}
+
+				if (StompCommand.SEND.equals(messageStompCommand)) {
 					System.out.println("The message is: " + message.getPayload());
 					System.out.println("Sending message to: " + accessor.getDestination());
-					handleIntentionalDisconnection(accessor, message);
+
 				}
 
 				return message;
 			}
 		};
 	}
+	
+	private void setUserToAccessor(StompHeaderAccessor accessor, UserDetails userDetailsFromToken) {
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+				userDetailsFromToken, null, userDetailsFromToken.getAuthorities());
+		accessor.setUser(new CustomPrincipal((Player) auth.getPrincipal()));
+		// TODO Auto-generated method stub
+		
+	}
 
-	private void handleStompDisconnect(StompHeaderAccessor accessor) {
-		// Abrupt disconnect
-		CustomPrincipal principal = (CustomPrincipal) accessor.getUser();
-		if (principal == null)
-			return;
-
-		System.out.println("Disconnecting user: " + principal.getName());
-		// Todo: Implement logic to remove player from game. And to save game state.
-		// And to notify the other player. XD
-	};
-
-	private void handleIntentionalDisconnection(StompHeaderAccessor accessor, Message<?> msg) {
-		CustomPrincipal principal = (CustomPrincipal) accessor.getUser();
-		if (principal == null)
-			return;
-
-		String payload = new String((byte[]) msg.getPayload());
-
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			PlayerConnectionMessage disconnectMessage = mapper.readValue(payload, PlayerConnectionMessage.class);
-			
-			Player user = principal.getPlayer();
-			
-			switch (disconnectMessage.getType()) {
-			case "REFRESH_INTENT":
-				System.out.println("User " + principal.getName() + " refreshed the page with intent. The message is: "
-						+ disconnectMessage.getMessage());
-				reconnectingPlayers.put(user, System.currentTimeMillis());
-				
-				scheduleDisconnectionCheck(user);
-				break;
-			case "CONNECTED":
-				System.out.println("User " + principal.getName() + " connected to the game. The message is: "
-						+ disconnectMessage.getMessage());
-				if(reconnectingPlayers.containsKey(user)) {
-					System.out.println("User " + principal.getName() + " reconnected to the game.");
-					reconnectingPlayers.remove(user);
-				}
-				break;
-			
-			case "NAVIGATION":
-				System.out.println("User " + principal.getName() + " navigated away from the page."
-						+ disconnectMessage.getPath() + ". The message is: " + disconnectMessage.getMessage());
-				break;
-			case "REFRESH":
-				System.out.println("User " + principal.getName() + " refreshed the page. The message is: "
-						+ disconnectMessage.getMessage());
-				break;
-			case "LEAVE":
-				System.out.println("User " + principal.getName() + " left the game. The message is: "
-						+ disconnectMessage.getMessage());
-				break;
-			default:
-				System.out.println("Unknown message type: " + disconnectMessage.getType());
-
-			}
-		} catch (Exception e) {
-			System.err.println("Error parsing disconnect message: " + e.getMessage());
-		}
-		;
+	private UserDetails getUserDetailsFromToken(String token) {
+		String username = tokenService.getUserNameFromToken(token);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		return userDetails;
 	};
 	
-	private void scheduleDisconnectionCheck(Player user) {
-	    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-	    executor.schedule(()->{
-	    	if(reconnectingPlayers.containsKey(user)) {
-	    		reconnectingPlayers.remove(user);
-	    		handlePlayerTimeout(user);
-	    	}
-	    	executor.shutdown();
-	    }, 15, TimeUnit.SECONDS);
+	private boolean isValidUrl (String urlDestination) {
+		if(urlDestination != null && isValidBattleShipSubscription(urlDestination)) {
+			return true;
+		}
+		return false;
 	}
 	
+	private boolean authTokenIsValid(String token)  {
+		
+		return tokenService.validateToken(token);
+	};
+	
+	private void reconnectPlayer(Player user) {
+		if (reconnectingPlayers.containsKey(user)) {
+			reconnectingPlayers.remove(user);
+			connectionEventService.publishReconnection(user);
+			return;
+		}
+		return;
+	};
+	private String getAuthTokenFromHeaders(List<String> authorization) {
+		String token = authorization.get(0).replace("Bearer ", "");
+		return token;
+	};
+	
+	private List<String> validateAuthorizationHeaders(StompHeaderAccessor accessor) throws MessageDeliveryException {
+		List<String> authorization = accessor.getNativeHeader("Authorization");
+		
+		if (authorization == null || authorization.isEmpty()) {
+			throw new MessageDeliveryException("Authorization header not found.");
+		}
+		
+		return authorization;
+	};
+	
+	private void handlePlayerDisconnect(Player user) {
+		reconnectingPlayers.put(user, System.currentTimeMillis());
+		connectionEventService.publisDisconnection(user);
+		scheduleDisconnectionCheck(user);
+	};
+	
+	private Player getPlayerFromAccessor(StompHeaderAccessor accessor) throws MessageDeliveryException {
+		CustomPrincipal principal = (CustomPrincipal) accessor.getUser();
+		Player user = principal.getPlayer();
+		if(user == null) {
+			throw new MessageDeliveryException("User not found in accessor.");
+		}
+		return user;
+	};
+
+	private void scheduleDisconnectionCheck(Player user) {
+		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		executor.schedule(() -> {
+			if (reconnectingPlayers.containsKey(user)) {
+				reconnectingPlayers.remove(user);
+				handlePlayerTimeout(user);
+			}
+			executor.shutdown();
+		}, 15, TimeUnit.SECONDS);
+	}
+
 	private void handlePlayerTimeout(Player user) {
 		System.out.println("User " + user.getUserName() + " timed out.");
+		connectionEventService.publishTimeOut(user);
 	}
+
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.enableSimpleBroker("/topic", "/queue");
@@ -267,21 +261,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws-battleship").setAllowedOrigins("*");
 	}
-
-	private boolean isValidBattleShipSubscription(String urlDestination, CustomPrincipal principal) {
-		if (principal == null) {
-			System.out.println("Principal is null");
-			return false;
-		}
-
+	
+	private boolean isValidBattleShipSubscription(String urlDestination) {
 		if (urlDestination.startsWith("/topic/game")) {
-			String gameId = urlDestination.substring("/topic/game".length());
-			System.out.println("GameId: " + gameId);
 			// TODO: Implement logic to check if player is already in the game.
 			return true;
 		}
-		;
+		
 
 		return false;
 	};
+
 }
