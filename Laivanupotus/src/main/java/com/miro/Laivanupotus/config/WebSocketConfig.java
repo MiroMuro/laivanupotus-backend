@@ -139,7 +139,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 						
 						Player user = getPlayerFromAccessor(accessor);
 						
-						reconnectPlayer(user);
+						reconnectPlayerIfDisconnected(user);
+						
+						connectionEventService.publishConnection(user, "Player connected.");
 					};
 				
 				}
@@ -197,10 +199,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 		return tokenService.validateToken(token);
 	};
 	
-	private void reconnectPlayer(Player user) {
+	private void reconnectPlayerIfDisconnected(Player user) {
 		if (reconnectingPlayers.containsKey(user)) {
 			reconnectingPlayers.remove(user);
-			connectionEventService.publishReconnection(user);
+			connectionEventService.publishReconnection(user,"Player reconnected.");
 			return;
 		}
 		return;
@@ -222,7 +224,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	
 	private void handlePlayerDisconnect(Player user) {
 		reconnectingPlayers.put(user, System.currentTimeMillis());
-		connectionEventService.publisDisconnection(user);
+		connectionEventService.publisDisconnection(user, "Player disconnected.");
 		scheduleDisconnectionCheck(user);
 	};
 	
@@ -248,7 +250,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	private void handlePlayerTimeout(Player user) {
 		System.out.println("User " + user.getUserName() + " timed out.");
-		connectionEventService.publishTimeOut(user);
+		connectionEventService.publishTimeOut(user, "Player  timed out.");
 	}
 
 	@Override

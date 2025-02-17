@@ -8,8 +8,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PlayerConnectionEvent {
-	private final Player player;
+	private final String playerUserName;
+	private final Long playerId;
 	private final ConnectionStatus status;
+	private final String message;
 	
 	public enum ConnectionStatus {
 		CONNECTED,RECONNECTED, DISCONNECTED, TIMED_OUT
