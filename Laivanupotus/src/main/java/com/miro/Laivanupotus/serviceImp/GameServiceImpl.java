@@ -61,7 +61,11 @@ public class GameServiceImpl implements GameService {
 	if (matchRequiringPlayer2.getStatus() != GameStatus.WAITING_FOR_PLAYER) {
 	    throw new RuntimeException("Match is not waiting for a player!");
 	}
-
+	
+	if(matchRequiringPlayer2.getPlayer2() != null) {
+        throw new RuntimeException("Match is already full!");
+	}
+	
 	if (matchRequiringPlayer2.getPlayer1().getId().equals(player.getId())) {
 	    throw new OwnGameJoinException("You cannot join your own match!");
 	}
@@ -231,6 +235,12 @@ public class GameServiceImpl implements GameService {
 
 	@Override
     public ActiveMatchResponseDto createMatch(Player player) {
+		
+	if(playerIsInAnActiveMatch(player)) {
+		throw new RuntimeException("You are already in an active match!");
+	};
+	
+	
 	Match newMatch = new Match();
 	newMatch.setPlayer1(player);
 	newMatch.setStatus(GameStatus.WAITING_FOR_PLAYER);
@@ -406,6 +416,18 @@ public class GameServiceImpl implements GameService {
 		webSocketHandler.notifyOpponentDisconnect(matchId, disconnectMessage);
 	};
 	
-	
+	private boolean playerIsInAnActiveMatch(Player player) {
+		
+        boolean hasUnfinishedGames = matchRepository.hasUnfinishedGames(player.getId(), GameStatus.FINISHED);
+        List<Match> match = matchRepository.findAll();
+        System.out.println("All matches: " + match);
+		if (hasUnfinishedGames) {
+		System.out.println("The player has unfinished games." + player.toString());
+		} else {
+			System.out.println("The player has no unfinished games." + player.toString());
+		}
+        
+		return false;
+	}
 
 }
