@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
+import com.miro.Laivanupotus.exceptions.UserNotFoundException;
 import com.miro.Laivanupotus.model.PlayerConnectionMessage;
 import com.miro.Laivanupotus.model.Match;
 import com.miro.Laivanupotus.model.Move;
@@ -38,7 +39,7 @@ public class GameController {
 
 	@PostMapping("/create")
 	public ResponseEntity<ActiveMatchResponseDto> createGame(@RequestParam Long userId) {
-		Player player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
+		Player player = userService.findById(userId).orElseThrow(() -> new UserNotFoundException("User with id: "+userId+" not found!"));
 
 		ActiveMatchResponseDto newMatchDto = gameService.createMatch(player);
 
@@ -48,7 +49,7 @@ public class GameController {
 	@PostMapping("/{matchId}/join")
 	public ResponseEntity<ActiveMatchResponseDto> joinGame(@RequestParam Long userId, @PathVariable Long matchId) {
 		Player player = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found!"));
-
+		
 		ActiveMatchResponseDto matchWithPlayersJoined = gameService.joinMatch(matchId, player);
 
 		return ResponseEntity.ok(matchWithPlayersJoined);

@@ -7,11 +7,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.miro.Laivanupotus.dto.ErrorResponseDto;
 
-@ControllerAdvice
+@RestControllerAdvice(basePackages = "com.miro.Laivanupotus.controller")
 public class ApplicationWideExceptionHandler {
+	
+	public ApplicationWideExceptionHandler() {
+        System.out.println("ApplicationWideErrorHandler initialized");
+    }
+	
+	
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponseDto> handleUserNotFoundException(
@@ -40,7 +47,7 @@ public class ApplicationWideExceptionHandler {
     };
 
     @ExceptionHandler(AuthenticationFailedException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public ResponseEntity<ErrorResponseDto> handleFailedAuthenticationException(
 	    AuthenticationFailedException ex) {
 	ErrorResponseDto errorResponse = new ErrorResponseDto(ex
@@ -53,15 +60,26 @@ public class ApplicationWideExceptionHandler {
     };
 
     @ExceptionHandler(OwnGameJoinException.class)
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE)
     public ResponseEntity<ErrorResponseDto> handleOwnGameJoinException(
 	    OwnGameJoinException ex) {
 	ErrorResponseDto errorResponse = new ErrorResponseDto(ex.getMessage(),
 		"NOT_ACCEPTABLE", HttpStatus.NOT_ACCEPTABLE.value(),
 		LocalDateTime.now());
-	return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+	return new ResponseEntity<ErrorResponseDto>(errorResponse, HttpStatus.UNAUTHORIZED);
     };
-
+    
+    @ExceptionHandler(PlayerInActiveMatchException.class)
+    @ResponseStatus(value = HttpStatus.CONFLICT)
+    public ResponseEntity<ErrorResponseDto> handlePlayerInActiveMatchException(
+        PlayerInActiveMatchException ex) {
+    	ErrorResponseDto errorResponse = new ErrorResponseDto(ex.getMessage(),
+    			"PLAYER_IN_ACTIVE_MATCH", HttpStatus.CONFLICT.value(),
+    			LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    };
+    
+    
     // Handle unexpected exceptions
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

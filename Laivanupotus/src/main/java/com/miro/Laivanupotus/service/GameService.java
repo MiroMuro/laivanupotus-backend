@@ -32,5 +32,6 @@ public interface GameService {
     
     ActiveMatchResponseDto getActiveMatch(Long matchId, Long playerId, GameStatus gameStatus);
     
+    
     void  disconnectPlayer(PlayerConnectionMessage disconnectMessage, Long matchId);
 }
