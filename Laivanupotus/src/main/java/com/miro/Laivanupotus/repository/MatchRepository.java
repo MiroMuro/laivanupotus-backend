@@ -17,7 +17,10 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 	List<Match> findByStatus(
 			com.miro.Laivanupotus.Enums.GameStatus waitingForPlayer);
 	
-	Optional<Match> findByIdAndStatus(Long matchId, com.miro.Laivanupotus.Enums.GameStatus gameStatus);
+	@Query("SELECT m FROM Match m where "+
+	"m.id = :matchId AND "+
+			"m.player1.id = :playerId OR m.player2.id = :playerId")
+	Optional<Match> findActiveMatchByMatchIdAndPlayerId(@Param("matchId")Long matchId, @Param("playerId")Long playerId);
 	
 	@Query("SELECT COUNT(m) > 0 FROM Match m where "+
 		   "(m.player1.id = :playerId OR m.player2.id = :playerId) "+

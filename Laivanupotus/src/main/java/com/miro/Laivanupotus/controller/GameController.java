@@ -117,9 +117,9 @@ public class GameController {
 	};
 
 	@GetMapping("/{matchId}/gamestate")
-	public ResponseEntity<ActiveMatchResponseDto> getGameState(@PathVariable Long matchId, @RequestParam Long userId,
-			@RequestParam GameStatus gameStatus) {
-		return ResponseEntity.ok(gameService.getActiveMatch(matchId, userId, gameStatus));
+	public ResponseEntity<ActiveMatchResponseDto> getGameStateWithUserIdAndMatchId(@PathVariable Long matchId, @RequestParam Long userId) {
+		ActiveMatchResponseDto activeMatch = gameService.getActiveMatchByUserIdAndMatchId(matchId, userId);
+		return ResponseEntity.ok(activeMatch);
 	};
 
 	@PostMapping("/{matchId}/leave")

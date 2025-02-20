@@ -18,6 +18,20 @@ public class ApplicationWideExceptionHandler {
         System.out.println("ApplicationWideErrorHandler initialized");
     }
 	
+	 @ExceptionHandler(MatchNotFoundException.class)
+	    @ResponseStatus(HttpStatus.NOT_FOUND)
+	    public ResponseEntity<ErrorResponseDto> handleMatchNotFoundException(
+		    MatchNotFoundException ex) {
+		ErrorResponseDto errorResponse = new ErrorResponseDto(ex
+			.getMessage(), "MATCH_NOT_FOUND",
+			HttpStatus.NOT_FOUND
+			.value(),
+			LocalDateTime
+			.now());
+
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	    };
+
 	
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

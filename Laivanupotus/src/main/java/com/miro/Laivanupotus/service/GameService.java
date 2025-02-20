@@ -30,7 +30,7 @@ public interface GameService {
 
     ActiveMatchResponseDto createMatch(Player player);
     
-    ActiveMatchResponseDto getActiveMatch(Long matchId, Long playerId, GameStatus gameStatus);
+    ActiveMatchResponseDto getActiveMatchByUserIdAndMatchId(Long matchId, Long playerId);
     
     
     void  disconnectPlayer(PlayerConnectionMessage disconnectMessage, Long matchId);

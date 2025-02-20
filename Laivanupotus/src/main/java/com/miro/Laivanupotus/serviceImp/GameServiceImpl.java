@@ -14,6 +14,7 @@ import com.miro.Laivanupotus.dto.IngameUserProfileDto;
 import com.miro.Laivanupotus.dto.WebSocketActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.WebSocketGameStatusUpdateResponseDto;
 import com.miro.Laivanupotus.dto.WebSocketMoveResponseDto;
+import com.miro.Laivanupotus.exceptions.MatchNotFoundException;
 import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.exceptions.PlayerInActiveMatchException;
 import com.miro.Laivanupotus.model.Board;
@@ -234,7 +235,8 @@ public class GameServiceImpl implements GameService {
 	public ActiveMatchResponseDto createMatch(Player player) {
 
 		if (playerIsInAnActiveMatch(player)) {
-			throw new PlayerInActiveMatchException("You are already in an active match! You cannot play multiple matches at once!");
+			throw new PlayerInActiveMatchException(
+					"You are already in an active match! You cannot play multiple matches at once!");
 		}
 		;
 
@@ -404,12 +406,12 @@ public class GameServiceImpl implements GameService {
 		return result;
 	}
 
-	@Override
-	public ActiveMatchResponseDto getActiveMatch(Long matchId, Long playerId, GameStatus status) {
-		// Match match = matchRepository.findById(matchId).orElseThrow(() -> new
-		// RuntimeException("Match not found!"));
-		Match match = matchRepository.findByIdAndStatus(matchId, status)
-				.orElseThrow(() -> new RuntimeException("Match not found!"));
+	public ActiveMatchResponseDto getActiveMatchByUserIdAndMatchId(Long matchId, Long playerId) {
+		
+
+		Match match = matchRepository.findActiveMatchByMatchIdAndPlayerId(matchId, playerId)
+				.orElseThrow(() -> new MatchNotFoundException(
+						"Match of id " + matchId + ", and with player id : " + playerId + "not found!"));
 		ActiveMatchResponseDto matchDto = MatchMapper.matchToActiveMatchResponseDto(match);
 		return matchDto;
 	}
@@ -418,7 +420,7 @@ public class GameServiceImpl implements GameService {
 	public void disconnectPlayer(PlayerConnectionMessage disconnectMessage, Long matchId) {
 		webSocketHandler.notifyOpponentDisconnect(matchId, disconnectMessage);
 	};
-	
+
 	private boolean playerIsInAnActiveMatch(Player player) {
 
 		boolean hasUnfinishedGames = matchRepository.hasUnfinishedGames(player.getId(), GameStatus.FINISHED);
