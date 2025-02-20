@@ -27,6 +27,12 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 			"AND m.status != :gameStatus")
 	boolean hasUnfinishedGames(@Param("playerId") Long playerId, @Param("gameStatus") GameStatus gameStatus);
 	
+	@Query("SELECT m.id FROM Match m where "+
+	"(m.player1.id = :playerId OR m.player2.id = :playerId) "+
+			"AND m.status != :gameStatus")
+	Optional<Long> getOngoingMatchId(@Param("playerId") Long playerId, @Param("gameStatus") GameStatus gameStatus);
+	
+	
 	@Override
 	Optional<Match> findById(Long matchId);
 

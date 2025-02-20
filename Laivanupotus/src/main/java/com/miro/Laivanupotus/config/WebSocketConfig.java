@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -127,7 +128,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 					
 					List<String> authorizationHeader = validateAuthorizationHeaders(accessor);
-					
+					Object gameIdHeader = accessor.getHeader("gameId");
+					System.out.println("The game id is: " + gameIdHeader);
 					String AuthtokenFromHeaders = getAuthTokenFromHeaders(authorizationHeader);
 					
 					boolean tokenIsValid = authTokenIsValid(AuthtokenFromHeaders);
@@ -143,6 +145,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 						
 						connectionEventService.publishConnection(user, "Player "+user.getUserName()+" connected.");
 					};
+					
+					MessageHeaders msghdrs = accessor.getMessageHeaders();
+					//Object gameIdHeader = accessor.getHeader("gameId");
+					System.out.println("The message headers are in connect: " + msghdrs);
 				
 				}
 
@@ -159,7 +165,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 				if (StompCommand.DISCONNECT.equals(messageStompCommand)) {
 					Player user = getPlayerFromAccessor(accessor);				
 					handlePlayerDisconnect(user);
-
+					MessageHeaders msghdrs = accessor.getMessageHeaders();
+					//Object gameIdHeader = accessor.getHeader("gameId");
+					System.out.println("The message headers are in disconnect: " + msghdrs);
 				}
 
 				if (StompCommand.SEND.equals(messageStompCommand)) {

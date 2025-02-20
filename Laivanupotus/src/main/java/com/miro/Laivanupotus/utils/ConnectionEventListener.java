@@ -17,9 +17,10 @@ public class ConnectionEventListener {
 	
 	@EventListener
 	public void handlePlayerConnectionEvent(PlayerConnectionEvent event) {
+		Long matchId = event.getMatchId();
 		// Implement a better message class.
 		//PlayerConnectionMessage message = new PlayerConnectionMessage(event.getPlayer().getId(), event.getStatus());
 		
-		messagingTemplate.convertAndSend("/topic/game/connections", event);
+		messagingTemplate.convertAndSend("/topic/game/"+matchId+"/connections", event);
 	};
 }

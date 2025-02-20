@@ -12,6 +12,7 @@ public class PlayerConnectionEvent {
 	private final Long playerId;
 	private final ConnectionStatus status;
 	private final String message;
+	private final Long matchId;
 	
 	public enum ConnectionStatus {
 		CONNECTED,RECONNECTED, DISCONNECTED, TIMED_OUT
