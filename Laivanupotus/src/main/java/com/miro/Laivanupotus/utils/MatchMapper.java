@@ -83,17 +83,22 @@ public class MatchMapper {
 	
 	public static MatchStatusResponseDto activeMatchToMatchStatusResponse (ActiveMatchResponseDto match, Long userId) {
 		Boolean isPlayer1 = match.getPlayer1().getId().equals(userId);
+		if(isPlayer1) {
+			System.out.println("The user is player1");
+		}
 		Boolean isPlayer2 = match.getPlayer2().getId().equals(userId);
+		if(isPlayer2) {
+            System.out.println("The user is player2");};
 		return MatchStatusResponseDto.builder().id(match.getId()).player1(match.getPlayer1()).player2(match.getPlayer2())
 				.player1Board(boardToDto(match.getPlayer1Board(),isPlayer1)).player2Board(boardToDto(match.getPlayer2Board(),isPlayer2)).currentTurnPlayerId(match.getCurrentTurnPlayerId())
 				.status(match.getStatus()).build();
 	};
 	
-	private static MatchStatusBoardDto boardToDto (Board board, boolean isOpponentsBoard) {
+	private static MatchStatusBoardDto boardToDto (Board board, boolean isPlayersBoard) {
 		//If the board is the opponents board, we don't want to show the ships.
 		return MatchStatusBoardDto.builder()
                 .id(board.getId())
-                .ships(isOpponentsBoard ? null : board.getShips())
+                .ships(isPlayersBoard ? board.getShips() : null)
                 .moves(board.getMoves())
                 .build();
 	};

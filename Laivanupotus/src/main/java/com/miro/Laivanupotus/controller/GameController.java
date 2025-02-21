@@ -18,6 +18,7 @@ import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
 import com.miro.Laivanupotus.dto.MatchStatusResponseDto;
+import com.miro.Laivanupotus.exceptions.AuthenticationFailedException;
 import com.miro.Laivanupotus.exceptions.UserNotFoundException;
 import com.miro.Laivanupotus.model.PlayerConnectionMessage;
 import com.miro.Laivanupotus.model.Match;
@@ -65,8 +66,7 @@ public class GameController {
 		boolean matchAuthorizationResult = gameService.authorizeMatch(matchId, userId);
 
 		if (!matchAuthorizationResult) {
-			return responseMessage = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-					.body("You are not authorized to play this match.");
+			throw new AuthenticationFailedException("You are not authorized to play this match.");
 		}
 
 		return responseMessage = ResponseEntity.ok("You are authorized to play this match.");

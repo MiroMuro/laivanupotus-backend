@@ -143,7 +143,7 @@ public class GameServiceImpl implements GameService {
 
 	private void beginGameIfBothPlayersPlacedShips(Match match) {
 		if (!match.getPlayer1Board().getShips().isEmpty() && !match.getPlayer2Board().getShips().isEmpty()) {
-
+			System.out.println("Both players have placed their ships!");
 			Match startedMatch = startMatch(match);
 
 			WebSocketGameStatusUpdateResponseDto gameBeginsMessage = createMatchStartOrEndWebsocketMessage(
