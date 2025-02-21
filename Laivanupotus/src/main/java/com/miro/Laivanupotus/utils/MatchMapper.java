@@ -5,7 +5,10 @@ import java.util.stream.Collectors;
 
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.IngameUserProfileDto;
+import com.miro.Laivanupotus.dto.MatchStatusBoardDto;
+import com.miro.Laivanupotus.dto.MatchStatusResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
+import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Match;
 
 public class MatchMapper {
@@ -77,6 +80,25 @@ public class MatchMapper {
 				.build();
 
 	};
+	
+	public static MatchStatusResponseDto activeMatchToMatchStatusResponse (ActiveMatchResponseDto match, Long userId) {
+		Boolean isPlayer1 = match.getPlayer1().getId().equals(userId);
+		Boolean isPlayer2 = match.getPlayer2().getId().equals(userId);
+		return MatchStatusResponseDto.builder().id(match.getId()).player1(match.getPlayer1()).player2(match.getPlayer2())
+				.player1Board(boardToDto(match.getPlayer1Board(),isPlayer1)).player2Board(boardToDto(match.getPlayer2Board(),isPlayer2)).currentTurnPlayerId(match.getCurrentTurnPlayerId())
+				.status(match.getStatus()).build();
+	};
+	
+	private static MatchStatusBoardDto boardToDto (Board board, boolean isOpponentsBoard) {
+		//If the board is the opponents board, we don't want to show the ships.
+		return MatchStatusBoardDto.builder()
+                .id(board.getId())
+                .ships(isOpponentsBoard ? null : board.getShips())
+                .moves(board.getMoves())
+                .build();
+	};
+
+	
 
 
 }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.miro.Laivanupotus.Enums.GameStatus;
 import com.miro.Laivanupotus.dto.ActiveMatchResponseDto;
 import com.miro.Laivanupotus.dto.AvailableMatchResponseDto;
+import com.miro.Laivanupotus.dto.MatchStatusResponseDto;
 import com.miro.Laivanupotus.exceptions.UserNotFoundException;
 import com.miro.Laivanupotus.model.PlayerConnectionMessage;
 import com.miro.Laivanupotus.model.Match;
@@ -25,6 +26,7 @@ import com.miro.Laivanupotus.model.Player;
 import com.miro.Laivanupotus.model.Ship;
 import com.miro.Laivanupotus.service.GameService;
 import com.miro.Laivanupotus.service.UserService;
+import com.miro.Laivanupotus.utils.MatchMapper;
 import com.miro.Laivanupotus.utils.UserAuthenticator;
 
 import lombok.RequiredArgsConstructor;
@@ -117,9 +119,10 @@ public class GameController {
 	};
 
 	@GetMapping("/{matchId}/gamestate")
-	public ResponseEntity<ActiveMatchResponseDto> getGameStateWithUserIdAndMatchId(@PathVariable Long matchId, @RequestParam Long userId) {
+	public ResponseEntity<MatchStatusResponseDto> getGameStateWithUserIdAndMatchId(@PathVariable Long matchId, @RequestParam Long userId) {
 		ActiveMatchResponseDto activeMatch = gameService.getActiveMatchByUserIdAndMatchId(matchId, userId);
-		return ResponseEntity.ok(activeMatch);
+		MatchStatusResponseDto matchDto = MatchMapper.activeMatchToMatchStatusResponse(activeMatch, userId);
+		return ResponseEntity.ok(matchDto);
 	};
 
 	@PostMapping("/{matchId}/leave")
