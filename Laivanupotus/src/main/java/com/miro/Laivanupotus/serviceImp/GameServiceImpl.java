@@ -333,6 +333,7 @@ public class GameServiceImpl implements GameService {
 
 	// The userId here is the player who made the last move.
 	private void updateMatchState(Match match, Board targetBoard, Long userId) {
+		System.out.println("The sunkShips are: "+sunkShips(targetBoard));
 		// Check if game is over
 		if (isGameOver(targetBoard)) {
 			endMatch(match, userId);
@@ -345,6 +346,10 @@ public class GameServiceImpl implements GameService {
 
 		match.setUpdatedAt(LocalDateTime.now());
 
+	};
+	private String sunkShips (Board targetBoard) {
+		String sunkShips = targetBoard.getShips().stream().filter(ship -> ship.isSunk()).map(ship -> ship.getType().toString()).reduce("", (acc, shipType) -> acc + shipType + ", ");
+		return sunkShips;
 	};
 	private void endMatch(Match match, Long userId) {
 		match.setEndedAt(LocalDateTime.now());
