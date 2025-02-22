@@ -86,11 +86,13 @@ public class MatchMapper {
 		if(isPlayer1) {
 			System.out.println("The user is player1");
 		}
+		Boolean isPoop = isPlayer1 ? false : true;
 		Boolean isPlayer2 = match.getPlayer2().getId().equals(userId);
 		if(isPlayer2) {
-            System.out.println("The user is player2");};
-		return MatchStatusResponseDto.builder().id(match.getId()).player1(match.getPlayer1()).player2(match.getPlayer2())
-				.player1Board(boardToDto(match.getPlayer1Board(),isPlayer1)).player2Board(boardToDto(match.getPlayer2Board(),isPlayer2)).currentTurnPlayerId(match.getCurrentTurnPlayerId())
+            System.out.println("The user is player2");
+            System.out.println("THE USER IS ISPOOPO BOOLEAN: "+isPoop);};
+		return MatchStatusResponseDto.builder().id(match.getId()).player(match.getPlayer1()).player(match.getPlayer2())
+				.playerBoard(boardToDto(match.getPlayer1Board(),isPlayer1)).playerBoard(boardToDto(match.getPlayer2Board(),isPlayer2)).currentTurnPlayerId(match.getCurrentTurnPlayerId())
 				.status(match.getStatus()).build();
 	};
 	

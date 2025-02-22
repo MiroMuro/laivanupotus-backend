@@ -14,10 +14,10 @@ import lombok.Setter;
 //This class is used to send match status to the client after the user has refreshed the page or reconnects to the match.
 public class MatchStatusResponseDto {
 	private Long id;
-	private IngameUserProfileDto player1;
-	private IngameUserProfileDto player2;
-	private MatchStatusBoardDto player1Board;
-	private MatchStatusBoardDto player2Board;
+	private IngameUserProfileDto player;
+	private IngameUserProfileDto opponent;
+	private MatchStatusBoardDto playerBoard;
+	private MatchStatusBoardDto opponentBoard;
 	private Long currentTurnPlayerId;
 	private GameStatus status;
 }

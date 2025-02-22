@@ -45,7 +45,10 @@ public class Match {
 
 	@Column(name = "current_turn")
 	private Long currentTurnPlayerId;
-
+	
+	@Column(name = "winner_id", nullable = true)
+	private Long winnerId;
+	
 	private LocalDateTime startTime;
 	private LocalDateTime updatedAt;
 	private LocalDateTime endedAt;

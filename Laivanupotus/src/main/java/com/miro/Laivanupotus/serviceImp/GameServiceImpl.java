@@ -17,6 +17,7 @@ import com.miro.Laivanupotus.dto.WebSocketMoveResponseDto;
 import com.miro.Laivanupotus.exceptions.MatchNotFoundException;
 import com.miro.Laivanupotus.exceptions.OwnGameJoinException;
 import com.miro.Laivanupotus.exceptions.PlayerInActiveMatchException;
+import com.miro.Laivanupotus.exceptions.UserNotFoundException;
 import com.miro.Laivanupotus.model.Board;
 import com.miro.Laivanupotus.model.Coordinate;
 import com.miro.Laivanupotus.model.PlayerConnectionMessage;
@@ -166,7 +167,14 @@ public class GameServiceImpl implements GameService {
 
 		return gameBeginsMessage;
 	}
-
+	private WebSocketGameStatusUpdateResponseDto createMatchEndWebSocketMessage(Match match, Long userId) {
+		IngameUserProfileDto winner = match.getPlayer1().getId().equals(userId)
+				? (IngameUserProfileDto) UserMapper.userToIngameUserProfileDto(match.getPlayer1())
+				: (IngameUserProfileDto) UserMapper.userToIngameUserProfileDto(match.getPlayer2());
+		WebSocketGameStatusUpdateResponseDto gameEndMessage = WebSocketGameStatusUpdateResponseDto.builder()
+				.player(winner).status(match.getStatus()).build();
+		return gameEndMessage;
+	};
 	// playerId is the player who made the move.
 	@Override
 	public Move makeMove(Long matchId, Long playerId, Move move) {
@@ -327,7 +335,7 @@ public class GameServiceImpl implements GameService {
 	private void updateMatchState(Match match, Board targetBoard, Long userId) {
 		// Check if game is over
 		if (isGameOver(targetBoard)) {
-			endMatch(match);
+			endMatch(match, userId);
 			return;
 		}
 		;
@@ -338,12 +346,12 @@ public class GameServiceImpl implements GameService {
 		match.setUpdatedAt(LocalDateTime.now());
 
 	};
-
-	private void endMatch(Match match) {
+	private void endMatch(Match match, Long userId) {
 		match.setEndedAt(LocalDateTime.now());
 		match.setUpdatedAt(LocalDateTime.now());
 		match.setStatus(GameStatus.FINISHED);
-		WebSocketGameStatusUpdateResponseDto gameEndedMessage = createMatchStartOrEndWebsocketMessage(match);
+		match.setWinnerId(userId);
+		WebSocketGameStatusUpdateResponseDto gameEndedMessage = createMatchEndWebSocketMessage(match, userId);
 		webSocketHandler.notifyGameUpdate(match.getId(), gameEndedMessage);
 	};
 
@@ -390,9 +398,7 @@ public class GameServiceImpl implements GameService {
 	public boolean authorizeMatch(Long matchId, Long playerId) {
 		Optional<Match> match = getMatchById(matchId);
 
-		System.out.println("The match is: " + match);
-		System.out.println("The player id is: " + playerId);
-		System.out.println("The match id is: " + matchId);
+	
 		boolean result = false;
 
 		if (!match.isPresent()) {
@@ -424,8 +430,6 @@ public class GameServiceImpl implements GameService {
 	private boolean playerIsInAnActiveMatch(Player player) {
 
 		boolean hasUnfinishedGames = matchRepository.hasUnfinishedGames(player.getId(), GameStatus.FINISHED);
-		List<Match> match = matchRepository.findAll();
-		System.out.println("All matches: " + match);
 		if (hasUnfinishedGames) {
 			System.out.println("The player has unfinished games." + player.toString());
 			return true;
